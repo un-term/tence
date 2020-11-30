@@ -13,6 +13,19 @@ BLUE = (0,0,255)
 DEEPSKYBLUE = (0,191,255)
 YELLOW = (255,255,0)
 
+def round_sig(x, sig=5):
+  return round(x, sig - int(math.floor(math.log10(abs(x))))-1)
+
+def round_sig_vector(V,sig=5):
+  Vx = round_sig(V[0],sig)
+  Vy = round_sig(V[1],sig)
+  return (Vx,Vy)
+
+def round_vector(V,digits):
+  Vx = round(V[0],digits)
+  Vy = round(V[1],digits)
+  return (Vx,Vy)
+
 def pol2cart(r, phi):
     x = r * math.cos(phi)
     y = r * math.sin(phi)
@@ -23,9 +36,27 @@ def vector_add(v1,v2):
   v3_y = v1[1]+v2[1]
   return (v3_x,v3_y)
 
+def vector_subtract(v1,v2):
+  v3_x = v1[0]-v2[0]
+  v3_y = v1[1]-v2[1]
+  return (v3_x,v3_y)
+
+def vector_scalar_mult(v,a):
+  vx = v[0]*a
+  vy = v[1]*a
+  return(vx,vy)
+
 def magnitude(v):
   mag = math.sqrt(v[0]**2 + v[1]**2)
   return mag
+
+def unit_vector(v):
+  vmag = magnitude(v)
+  unit_vx = v[0]/vmag
+  unit_vy = v[1]/vmag
+  return(unit_vx,unit_vy)
+
+# def update_vector_position(vectorA,vectorB,speed,time)
 
 class Screen:
   def __init__(self,size):
@@ -98,17 +129,29 @@ class Baddie(pygame.sprite.Sprite):
     self.radius = 10 # range - circle collision detection
     self.rect = self.image.get_rect()
     self.rect.center = position
-    self.speed = 5 # pixes per second
+    self.speed = 10 # pixes per second
     self.velocity = ()
+  
+  def move(self,turret,time_passed):
+    # S - position, V - velocity, l - local, g - global, n - new
+    S_g_a = turret.rect.center
+    S_g_b = self.rect.center
+    
+    S_l_b_a = vector_subtract(S_g_a,S_g_b)
+    magS_l_b_a = round(magnitude(S_l_b_a), 2)
 
-  def calculate_velocity(self,turret):
-    V_bt = vector_add(turret.rect.center,self.rect.center)
-    m_V_bt = magnitude(V_bt)
-    self.velocity = (self.speed*(V_bt[0]/m_V_bt),self.speed*(V_bt[1]/m_V_bt))
+    if not magS_l_b_a < 10:
 
-  def move(self,time):
-    self.rect.center = vector_add(self.rect.center,(self.velocity[0]*time,self.velocity[1]*time))
+      unitS_l_b_a = round_vector(unit_vector(S_l_b_a), 2)
 
+      V_l_b_a = vector_scalar_mult(unitS_l_b_a,self.speed)
+      # breakpoint()
+
+      # New b position
+      S_l_b_bn = vector_scalar_mult(V_l_b_a,time_passed)
+      S_g_bn = vector_add(S_g_b,S_l_b_bn)
+
+      self.rect.center = S_g_bn
 
 class Line:
   def __init__(self,colour, start, end):
@@ -144,7 +187,7 @@ class Events:
         
       mouse_buttons = pygame.mouse.get_pressed()
       if mouse_buttons[0] is True:
-        print("mouse button 1 pressed")
+        # print("mouse button 1 pressed")
         # self.create = 1
         return 1
 
@@ -159,12 +202,13 @@ def main():
   turret_list = []
   line_list = []
   # baddie = baddie(1,(300,300))
-  baddie_list.append( Baddie(1,(300,300)) )
-  baddie_list.append( Baddie(2,(200,300)) )
-  baddie_list.append( Baddie(2,(175,200)) )
-  baddie_list.append( Baddie(2,(50,75)) )
-  baddie_list.append( Baddie(2,(100,50)) )
-  turret_list.append( Turret((100,100),5,300,2) )
+  # baddie_list.append( Baddie(1,(300,300)) )
+  # baddie_list.append( Baddie(2,(125,275)) ) # paper example 
+  baddie_list.append( Baddie(2,(127,400)) )
+  # baddie_list.append( Baddie(2,(175,200)) )
+  # baddie_list.append( Baddie(2,(50,75)) )
+  # baddie_list.append( Baddie(2,(100,50)) )
+  turret_list.append( Turret((100,200),5,300,2) )
 
   baddiesprites = pygame.sprite.Group(baddie_list)
   turretsprites = pygame.sprite.Group(turret_list)
@@ -182,11 +226,12 @@ def main():
 
 
 
-  initial = 1
+  initial = 0
   # main game loop
   events.done = 0
   hit_list = []
   time_passed = 0
+
   while not events.done:
 
     pygame.display.update()
@@ -209,7 +254,6 @@ def main():
       print("Remove: ", hit_list[0])
       hit_list[0].kill()
       # baddiesprites.kill(hit_list[0])
-      print("Remove: ", hit_list[0])
 
     # hit_list = pygame.sprite.spritecollide(turret_list[0],baddiesprites, False, pygame.sprite.collide_circle)
     if hit_list:
@@ -226,13 +270,22 @@ def main():
 
     # loop through turret group and and loop through lines to draw
     time_passed_seconds = time_passed/1000
+    time_passed_seconds = 1
     allsprites.update(line_list)
     # allsprites.remove(destroy)
     
     # Move all baddies toward turret
     for baddie in baddiesprites:
-      baddie.calculate_velocity(turret_list[0])
-      baddie.move(time_passed_seconds)
+      baddie.move(turret_list[0],time_passed_seconds)
+      # baddie.rect.center =turret_list[0].rect.center 
+      # Dx = 0
+      # Dy = 10
+      # bx = baddie.rect.center[0]
+      # by = baddie.rect.center[1]
+      # baddie.rect.center = (bx-Dx,by-Dy)
+      # print(baddie.rect.center)
+
+      # break
 
     # screen.blit(background, (0, 0))
     screen.fill(black)
@@ -242,6 +295,7 @@ def main():
     # for line in line_list:
     #   line.draw(screen)
     time_passed = clock.tick(60)
+    # events.done=1 
   pygame.quit()
 
 
