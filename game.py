@@ -3,7 +3,6 @@
 import pygame
 import math
 import random
-#import pygame as pygame
 
 WINSIZE = [640, 480]
 white = (255, 240, 200)
@@ -58,23 +57,83 @@ def unit_vector(v):
 
 # def update_vector_position(vectorA,vectorB,speed,time)
 
-class Screen:
-  def __init__(self,size):
-    self.grid_size = 10
+# set GUI to 1 to display
+class Game:
+  def __init__(self,baddie_list,turret, GUI=1):
+    # screen
+    self.GUI = GUI
+    self.winsize = (400,400)
+
+    self.clock = pygame.time.Clock()
+    self.events = pygame.event
+
+    # sprites and groups
+    self.baddie_group = pygame.sprite.Group(baddie_list)
+    self.turret_group = pygame.sprite.Group(turret)
+    self.allsprites_group = pygame.sprite.RenderPlain(self.baddie_group,self.turret_group)
+
+    if self.GUI:
+      self.screen = pygame.display.set_mode(self.winsize)
+
+    self.continue_game = 1
+
+  # mouse & keyboard input
+  def check_events(self):
+    for event in self.events.get():
+
+      # quiting pygame
+      if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
+        self.continue_game = 0
+        break
+      # mouse button baddie creation
+      mouse_buttons = pygame.mouse.get_pressed()
+      if mouse_buttons[0]:
+        mouse_pos = pygame.mouse.get_pos()
+        new_baddie = Baddie(mouse_pos)
+        new_baddie.add(self.baddie_group,self.allsprites_group)
+
+  def loop(self, time_limit, step_limit):
+    total_time = 0
+    step_time = 0
+    step = 0
+    while self.continue_game:
+
+      #update all sprites
+      self.baddie_group.update(self.turret_group.sprites()[0],step_time)
+      self.turret_group.update(self.baddie_group)
+
+      if self.GUI:
+        pygame.display.update()
+
+        self.check_events()
+
+        self.screen.fill(black)
+        # pygame.display.set_caption("black")
+        self.allsprites_group.draw(self.screen)
+        # alllines.draw(self.screen)
+
+      step_time = self.clock.tick(60)/1000.0 # miliseconds to seconds
+      step += 1
+
+      total_time += step_time
+
+      if not time_limit == 0 and total_time >= time_limit:
+          self.continue_game = 0
+      if not step_limit == 0 and step >= step_limit:
+        self.continue_game = 0
+
+  pygame.quit()
+    
 
 class Turret(pygame.sprite.Sprite):
   # Constructor
-  def __init__(self,position,ammo,range,damage):
+  def __init__(self,position):
     # Call the parent class (Sprite) constructor
     pygame.sprite.Sprite.__init__(self)  
 
-    self.radius = 100 # shoot range - circle collision detection
-    self.ammo = ammo
-    self.reloading = 0
-    self.damage = damage
-    self.head_angle = 0
-    self.angle_speed = math.pi/12 # degree/frame
-    self.laser_list = []
+    self.position = position
+    self.radius = 15 # shoot range - circle collision detection
+    self.ammo = 5
 
     # body
     self.image = pygame.Surface((30,30))
@@ -84,83 +143,81 @@ class Turret(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = position
 
-    # scanner
-    self.scan_line_start = self.rect.center
-    self.scan_line_end = (self.rect.center[0],self.rect.center[1]+self.radius)
-    self.image.fill(DEEPSKYBLUE)
-
-  def update(self,line_list):
+  def update(self,baddie_group):
     # self._scan(line_list)
-    self.reloading = 0
+    hit_list = self._check_for_targets(baddie_group)
+    if hit_list:
+      for baddie in hit_list:
+        self._shoot(baddie)
 
-  # def _scan(self,line_list, baddie_group_in_range):
-  # def _scan(self,line_list):
-  #   print("updating scan")
-  #   self.head_angle += math.pi/24
-  #   print(self.head_angle)
+  def _check_for_targets(self,target_group):
+    hit_list = []
+    hit_list = pygame.sprite.spritecollide(self,target_group, False, pygame.sprite.collide_circle)
+    return hit_list
 
-  #   self.Vg_scan_line = vector_add(pol2cart(self.radius,self.head_angle),self.position)
-
-  #   line_list.append(Line(YELLOW,self.position,self.Vg_scan_line))
-
-  #   if self.head_angle > 2*math.pi:
-  #     self.head_angle -= 2*math.pi
-
-  def shoot(self,baddie,line_list):
-    if not self.reloading:
-      if self.ammo > 0:
-        #create rect along firing line
-        # self.ammo-=1 #CHANGE - commented to testing
-        # print("shoot!")
-        baddie.health -= self.damage
-        self.laser_list.append(Line(red,self.rect.center,baddie.rect.center)) #CHANGE - remove dead baddie from lists
-      # CHANGE - add laser list to each turret object
-    # else:
-      # print("Out of ammo")
+  def _shoot(self,target):
+    if self.ammo > 0:
+        print("Shoot: ", target)
+        target.kill()
 
 class Baddie(pygame.sprite.Sprite):
-  def __init__(self, health,position):
+  def __init__(self,position):
     pygame.sprite.Sprite.__init__(self)  
 
-    self.health = health
+    self.position = position
+    self.health = 5
 
     self.image = pygame.Surface((10,10))
     self.image.fill(white)
-    self.radius = 10 # range - circle collision detection
+    self.radius = 5 # circle collision detection
     self.rect = self.image.get_rect()
     self.rect.center = position
-    self.speed = 10 # pixes per second
+    self.speed = 1.0 # pixels per second - decimal important!
     self.velocity = ()
+
+  def update(self,turret,time_passed):
+    self._move(turret,time_passed) # miliseconds
+    # self._move(turret,time_passed)
   
-  def move(self,turret,time_passed):
+  def _move(self,turret,time_passed):
     # S - position, V - velocity, l - local, g - global, n - new
-    S_g_a = turret.rect.center
-    S_g_b = self.rect.center
-    
+    S_g_a = turret.position
+    S_g_b = self.position
+    # speed
+    # dist between (mag), direction (unit), 
+
     S_l_b_a = vector_subtract(S_g_a,S_g_b)
-    magS_l_b_a = round(magnitude(S_l_b_a), 2)
+    # distance between turret and this baddie
+    magS_l_b_a = magnitude(S_l_b_a)
+    # print(magS_l_b_a)
 
     if not magS_l_b_a < 10:
 
-      unitS_l_b_a = round_vector(unit_vector(S_l_b_a), 2)
-
-      V_l_b_a = vector_scalar_mult(unitS_l_b_a,self.speed)
+      # direction of turret from this baddie
+      unitS_l_b_a = unit_vector(S_l_b_a)
+      
+      if not self.velocity:
+        # print("direction: ", unitS_l_b_a)
+        V_l_b_a = vector_scalar_mult(unitS_l_b_a,self.speed)
+        self.velocity = V_l_b_a
       # breakpoint()
 
-      # New b position
+      # move baddie to new position towards turret
+      V_l_b_a = self.velocity
+
       S_l_b_bn = vector_scalar_mult(V_l_b_a,time_passed)
       S_g_bn = vector_add(S_g_b,S_l_b_bn)
+      #print(S_g_bn)
 
-      self.rect.center = S_g_bn
+      self.position= S_g_bn
+      self.rect.center = round_vector(S_g_bn,0) # update rect seperately - rounds to integers
+      # print(self.rect.center)
 
 class Line:
   def __init__(self,colour, start, end):
     self.colour = colour
     self.start = start
     self.end = end
-
-  # def draw(self, surface):
-  #   pygame.draw.line(surface,self.colour,self.start,self.end)
 
 class RenderLines:
   def __init__(self):
@@ -171,133 +228,13 @@ class RenderLines:
     for line in self.lines_list:
       pygame.draw.line(surface,line.colour,line.start,line.end)
 
-class Events:
-  def __init__(self):
-    self.done = 0
-    self.create = 0
-  # def eventCheck:
-  #   if mousepressed:
-  #     createBaddie
-  
-  def mouse_press(self):
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
-        self.done = 1
-        break
-        
-      mouse_buttons = pygame.mouse.get_pressed()
-      if mouse_buttons[0] is True:
-        # print("mouse button 1 pressed")
-        # self.create = 1
-        return 1
-
-
 def main():
-  screen = pygame.display.set_mode(WINSIZE)
-  pygame.display.set_caption("black")
-  screen.fill(black)
-  clock = pygame.time.Clock()
+  
+  baddie_list = [ Baddie((200,300)) ]
+  turret = Turret((125,235))
 
-  baddie_list = []
-  turret_list = []
-  line_list = []
-  # baddie = baddie(1,(300,300))
-  # baddie_list.append( Baddie(1,(300,300)) )
-  # baddie_list.append( Baddie(2,(125,275)) ) # paper example 
-  baddie_list.append( Baddie(2,(127,400)) )
-  # baddie_list.append( Baddie(2,(175,200)) )
-  # baddie_list.append( Baddie(2,(50,75)) )
-  # baddie_list.append( Baddie(2,(100,50)) )
-  turret_list.append( Turret((100,200),5,300,2) )
-
-  baddiesprites = pygame.sprite.Group(baddie_list)
-  turretsprites = pygame.sprite.Group(turret_list)
-  # allsprites = pygame.sprite.RenderPlain(baddie_list,turret_list)
-  allsprites = pygame.sprite.RenderPlain(baddiesprites,turretsprites)
-
-  # print(pygame.sprite.spritecollide(turret_list[0],baddiesprites, False, pygame.sprite.collide_circle))
-
-  # allsprites.reoffset(baddie_list[0])
-  events = Events()
-  # events.spawnBaddie(allsprites)
-  # checkFireTargets(allsprites.sprites(), turret_list, line_list)
-  alllines = RenderLines()
-  alllines.storelines(line_list)
-
-
-
-  initial = 0
-  # main game loop
-  events.done = 0
-  hit_list = []
-  time_passed = 0
-
-  while not events.done:
-
-    pygame.display.update()
-    # Multiple turrets
-    # Check targets and shoot!
-    # hit_dict = pygame.sprite.groupcollide(turretsprites,baddiesprites, False, False, pygame.sprite.collide_circle)
-    # for turretKey in hit_dict:
-    #   for baddieValue in hit_dict[turretKey]:
-    #     turretKey.shoot(baddieValue,line_list)
-    
-    # One turret
-    # Check targets and shoot!
-    # if not initial:
-    #   if destroy:
-    #     allsprites.remove(destroy)
-    #     initial = 0
-    # destroy = []
-
-    if hit_list:
-      print("Remove: ", hit_list[0])
-      hit_list[0].kill()
-      # baddiesprites.kill(hit_list[0])
-
-    # hit_list = pygame.sprite.spritecollide(turret_list[0],baddiesprites, False, pygame.sprite.collide_circle)
-    if hit_list:
-      print("Hit!")
-
-    for baddie in hit_list:
-      turret_list[0].shoot(baddie,line_list)
-
-    # create baddie on mouse press
-    if events.mouse_press():
-      mouse_pos = pygame.mouse.get_pos()
-      new_baddie = Baddie(2,mouse_pos)
-      new_baddie.add(allsprites,baddiesprites)
-
-    # loop through turret group and and loop through lines to draw
-    time_passed_seconds = time_passed/1000
-    time_passed_seconds = 1
-    allsprites.update(line_list)
-    # allsprites.remove(destroy)
-    
-    # Move all baddies toward turret
-    for baddie in baddiesprites:
-      baddie.move(turret_list[0],time_passed_seconds)
-      # baddie.rect.center =turret_list[0].rect.center 
-      # Dx = 0
-      # Dy = 10
-      # bx = baddie.rect.center[0]
-      # by = baddie.rect.center[1]
-      # baddie.rect.center = (bx-Dx,by-Dy)
-      # print(baddie.rect.center)
-
-      # break
-
-    # screen.blit(background, (0, 0))
-    screen.fill(black)
-    allsprites.draw(screen)
-    alllines.draw(screen)
-
-    # for line in line_list:
-    #   line.draw(screen)
-    time_passed = clock.tick(60)
-    # events.done=1 
-  pygame.quit()
-
+  facdustry = Game(baddie_list, turret, GUI=1)
+  facdustry.loop(time_limit = 0, step_limit=0)
 
 # if python says run, then we should run
 if __name__ == "__main__":
