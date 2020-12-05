@@ -37,21 +37,29 @@ class TTD(unittest.TestCase):
     result = game.magnitude((3,4))
     self.assertEqual(5,result)
 
-  def test_move_repeated(self)
-    turret = Turret((100,200),5,300,2)
-    baddie = Baddie(2,(125,275))
+  def test_unit_vector(self):
+    result = game.unit_vector((5,5))
+    result = game.round_sig_vector(result, 3)
+    self.assertEqual((0.707,0.707), result)
 
-    it = 0
-    done = 0
-    while not done:
-      it += 1
-      baddie.move(turret,1)
-      if i == 5:
-        done = 1
-        
-  result = baddie.rect.center
+  def test_shoot_one_baddie(self):
+    baddie_list = [ game.Baddie((200,250),speed=50) ]
+    turret = game.Turret((100,150))
+    facdustry = game.Game(baddie_list, turret, GUI=0)
+    facdustry.loop(time_limit = 6, step_limit=0, constant_step_time=0)
+    baddie_list = facdustry.baddie_group.sprites()
+    self.assertFalse(baddie_list)
 
-  self.assertEqual((,result)
+  def test_shoot_one_baddie_within_time(self):
+    # tested from speedsheet calcs
+    baddie_list = [ game.Baddie((100,300),speed=10) ]
+    turret = game.Turret((0,0))
+    facdustry = game.Game(baddie_list, turret, GUI=0)
+    facdustry.loop(time_limit = 32, step_limit=0, constant_step_time=1)
+    baddie_list = facdustry.baddie_group.sprites()
+    self.assertFalse(baddie_list)
+
+  # test time for baddie to be destroyed
 
   # def test_new_position(self):
   #   S_g_a = (100,200)  
