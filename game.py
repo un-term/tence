@@ -5,9 +5,10 @@ import math
 import random
 
 WINSIZE = [640, 480]
-white = (255, 240, 200)
-black = (20, 20, 40)
-red =   (255,   0,   0)
+WHITE = (255, 255, 255)
+BLACK = (20, 20, 40)
+RED =   (255,   0,   0)
+GREEN = (0, 255, 0)
 BLUE = (0,0,255)
 DEEPSKYBLUE = (0,191,255)
 YELLOW = (255,255,0)
@@ -92,7 +93,7 @@ class Game:
         new_baddie = Baddie(mouse_pos)
         new_baddie.add(self.baddie_group,self.allsprites_group)
 
-  def loop(self, time_limit, step_limit):
+  def loop(self, time_limit, step_limit, constant_step_time):
     total_time = 0
     step_time = 0
     step = 0
@@ -107,12 +108,17 @@ class Game:
 
         self.check_events()
 
-        self.screen.fill(black)
-        # pygame.display.set_caption("black")
+        self.screen.fill(BLACK)
+        # pygame.display.set_caption("BLACK")
         self.allsprites_group.draw(self.screen)
         # alllines.draw(self.screen)
 
-      step_time = self.clock.tick(60)/1000.0 # miliseconds to seconds
+      if constant_step_time == 0: 
+        step_time = self.clock.tick(60)/1000.0 # miliseconds to seconds
+      else:
+        step_time = constant_step_time
+
+      
       step += 1
 
       total_time += step_time
@@ -146,9 +152,8 @@ class Turret(pygame.sprite.Sprite):
   def update(self,baddie_group):
     # self._scan(line_list)
     hit_list = self._check_for_targets(baddie_group)
-    if hit_list:
-      for baddie in hit_list:
-        self._shoot(baddie)
+    for baddie in hit_list:
+      self._shoot(baddie)
 
   def _check_for_targets(self,target_group):
     hit_list = []
@@ -161,18 +166,18 @@ class Turret(pygame.sprite.Sprite):
         target.kill()
 
 class Baddie(pygame.sprite.Sprite):
-  def __init__(self,position):
+  def __init__(self,position,speed=10):
     pygame.sprite.Sprite.__init__(self)  
 
     self.position = position
     self.health = 5
 
     self.image = pygame.Surface((10,10))
-    self.image.fill(white)
+    self.image.fill(WHITE)
     self.radius = 5 # circle collision detection
     self.rect = self.image.get_rect()
     self.rect.center = position
-    self.speed = 1.0 # pixels per second - decimal important!
+    self.speed = speed # pixels per second - decimal important!
     self.velocity = ()
 
   def update(self,turret,time_passed):
@@ -230,11 +235,11 @@ class RenderLines:
 
 def main():
   
-  baddie_list = [ Baddie((200,300)) ]
-  turret = Turret((125,235))
+  baddie_list = [ Baddie((300,300),speed=10.0) ]
+  turret = Turret((100,100))
 
   facdustry = Game(baddie_list, turret, GUI=1)
-  facdustry.loop(time_limit = 0, step_limit=0)
+  facdustry.loop(time_limit = 0, step_limit=0, constant_step_time=0)
 
 # if python says run, then we should run
 if __name__ == "__main__":
