@@ -58,6 +58,8 @@ def unit_vector(v):
 
 # def update_vector_position(vectorA,vectorB,speed,time)
 
+continue_game = 1
+
 # set GUI to 1 to display
 class Game:
   def __init__(self,baddie_list,turret, GUI=1):
@@ -72,11 +74,12 @@ class Game:
     self.baddie_group = pygame.sprite.Group(baddie_list)
     self.turret_group = pygame.sprite.Group(turret)
     self.allsprites_group = pygame.sprite.RenderPlain(self.baddie_group,self.turret_group)
+    # self.being_shot_group = pygame.sprite.Group()
 
     if self.GUI:
       self.screen = pygame.display.set_mode(self.winsize)
 
-    self.continue_game = 1
+    # self.continue_game = 1
 
   # mouse & keyboard input
   def check_events(self):
@@ -84,7 +87,8 @@ class Game:
 
       # quiting pygame
       if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
-        self.continue_game = 0
+        global continue_game
+        continue_game = 0
         break
       # mouse button baddie creation
       mouse_buttons = pygame.mouse.get_pressed()
@@ -97,11 +101,12 @@ class Game:
     total_time = 0
     step_time = 0
     step = 0
-    while self.continue_game:
+    global continue_game
+    while continue_game:
 
       #update all sprites
       self.baddie_group.update(self.turret_group.sprites()[0],step_time)
-      self.turret_group.update(self.baddie_group)
+      self.turret_group.update(self.baddie_group, total_time)
 
       if self.GUI:
         pygame.display.update()
@@ -124,9 +129,11 @@ class Game:
       total_time += step_time
 
       if not time_limit == 0 and total_time >= time_limit:
-          self.continue_game = 0
+        # global continue_game
+        continue_game = 0
       if not step_limit == 0 and step >= step_limit:
-        self.continue_game = 0
+        # global continue_game
+        continue_game = 0
 
   pygame.quit()
     
@@ -138,8 +145,10 @@ class Turret(pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self)  
 
     self.position = position
-    self.radius = 15 # shoot range - circle collision detection
+    self.radius = 50 # shoot range - circle collision detection
     self.ammo = 5
+    self.reload_time = 0.5
+    self.shoot_timestamp = 0
 
     # body
     self.image = pygame.Surface((30,30))
@@ -149,16 +158,33 @@ class Turret(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = position
 
-  def update(self,baddie_group):
-    # self._scan(line_list)
-    hit_list = self._check_for_targets(baddie_group)
-    for baddie in hit_list:
-      self._shoot(baddie)
+  def update(self,baddie_group,total_time):
+
+    # Check for targets & fire
+    if total_time - self.shoot_timestamp > self.reload_time: # reloading
+      hit_list = self._check_for_targets(baddie_group)
+      if hit_list:
+        self._shoot(hit_list[0]) # shoot first baddie in list only
+        self.shoot_timestamp = total_time
+
+    # check for baddies touching turret - end game
+    touch_list = self._check_for_touching(baddie_group)
+    if touch_list:
+      global continue_game
+      continue_game = 0
+
+    # for baddie in hit_list:
+    #   self._shoot(baddie)
 
   def _check_for_targets(self,target_group):
     hit_list = []
     hit_list = pygame.sprite.spritecollide(self,target_group, False, pygame.sprite.collide_circle)
     return hit_list
+
+  def _check_for_touching(self,target_group):
+    touch_list =[]
+    touch_list = pygame.sprite.spritecollide(self,target_group, False, pygame.sprite.collide_rect)
+    return touch_list
 
   def _shoot(self,target):
     if self.ammo > 0:
@@ -179,10 +205,18 @@ class Baddie(pygame.sprite.Sprite):
     self.rect.center = position
     self.speed = speed # pixels per second - decimal important!
     self.velocity = ()
+    self.being_shot = 0
 
   def update(self,turret,time_passed):
     self._move(turret,time_passed) # miliseconds
+    self._check_touching_turret(turret)
     # self._move(turret,time_passed)
+
+  def _check_touching_turret(self,turret):
+    if pygame.sprite.collide_rect(self,turret):
+      print("GAME OVER - BADDIE WIN")
+      # return 0
+
   
   def _move(self,turret,time_passed):
     # S - position, V - velocity, l - local, g - global, n - new
