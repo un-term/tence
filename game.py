@@ -79,6 +79,8 @@ class Game:
     if self.GUI:
       self.screen = pygame.display.set_mode(self.winsize)
 
+
+
     # self.continue_game = 1
 
   # mouse & keyboard input
@@ -94,7 +96,7 @@ class Game:
       mouse_buttons = pygame.mouse.get_pressed()
       if mouse_buttons[0]:
         mouse_pos = pygame.mouse.get_pos()
-        new_baddie = Baddie(mouse_pos)
+        new_baddie = Baddie(mouse_pos, speed=30)
         new_baddie.add(self.baddie_group,self.allsprites_group)
 
   def loop(self, time_limit, step_limit, constant_step_time):
@@ -116,6 +118,7 @@ class Game:
         self.screen.fill(BLACK)
         # pygame.display.set_caption("BLACK")
         self.allsprites_group.draw(self.screen)
+        draw_lines(self.screen,self.turret_group)
         # alllines.draw(self.screen)
 
       if constant_step_time == 0: 
@@ -145,10 +148,11 @@ class Turret(pygame.sprite.Sprite):
     pygame.sprite.Sprite.__init__(self)  
 
     self.position = position
-    self.radius = 50 # shoot range - circle collision detection
+    self.radius = 100 # shoot range - circle collision detection
     self.ammo = 5
-    self.reload_time = 0.5
+    self.reload_time = 0.05
     self.shoot_timestamp = 0
+    self.line = 0 
 
     # body
     self.image = pygame.Surface((30,30))
@@ -166,6 +170,9 @@ class Turret(pygame.sprite.Sprite):
       if hit_list:
         self._shoot(hit_list[0]) # shoot first baddie in list only
         self.shoot_timestamp = total_time
+        self.line=Line(RED, self.position, hit_list[0].position) # laser
+      else:
+        self.line = 0
 
     # check for baddies touching turret - end game
     touch_list = self._check_for_touching(baddie_group)
@@ -258,19 +265,26 @@ class Line:
     self.start = start
     self.end = end
 
+def draw_lines(surface,object_group):
+  for object in object_group:
+    if object.line:
+      pygame.draw.line(surface,object.line.colour,object.line.start,object.line.end)
+
 class RenderLines:
   def __init__(self):
     self.lines_list = []
-  def storelines(self,line_list):
+
+  def store_lines(self,line_list):
     self.lines_list = line_list
+
   def draw(self, surface):
     for line in self.lines_list:
       pygame.draw.line(surface,line.colour,line.start,line.end)
 
 def main():
   
-  baddie_list = [ Baddie((300,300),speed=10.0) ]
-  turret = Turret((100,100))
+  baddie_list = [ Baddie((300,300),speed=30.0) ]
+  turret = Turret((200,200))
 
   facdustry = Game(baddie_list, turret, GUI=1)
   facdustry.loop(time_limit = 0, step_limit=0, constant_step_time=0)
