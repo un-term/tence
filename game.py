@@ -62,9 +62,10 @@ continue_game = 1
 
 # set GUI to 1 to display
 class Game:
-  def __init__(self,baddie_list,turret, GUI=1):
+  def __init__(self,baddie_list,turret, GUI=1,sound_on=1):
     # screen
     self.GUI = GUI
+    self.sound_on = sound_on
     self.winsize = (400,400)
 
     self.clock = pygame.time.Clock()
@@ -73,13 +74,22 @@ class Game:
     # sprites and groups
     self.baddie_group = pygame.sprite.Group(baddie_list)
     self.turret_group = pygame.sprite.Group(turret)
-    self.allsprites_group = pygame.sprite.RenderPlain(self.baddie_group,self.turret_group)
+    self.allsprites_group = pygame.sprite.Group(baddie_list,turret)
     # self.being_shot_group = pygame.sprite.Group()
 
-    if self.GUI:
+    # link sprites to game
+    for sprite in self.allsprites_group:
+      sprite.game = self
+
+    if self.GUI: # includes sounds
       self.screen = pygame.display.set_mode(self.winsize)
-
-
+    if self.sound_on:
+      pass
+      # sound
+      # self.mixer = pygame.mixer
+      # pygame.mixer.init()
+      # self.laser_sound = pygame.mixer.Sound("pew.ogg")
+      # self.sound_list = [] # load sounds list
 
     # self.continue_game = 1
 
@@ -97,6 +107,7 @@ class Game:
       if mouse_buttons[0]:
         mouse_pos = pygame.mouse.get_pos()
         new_baddie = Baddie(mouse_pos, speed=30)
+        new_baddie.game = self
         new_baddie.add(self.baddie_group,self.allsprites_group)
 
   def loop(self, time_limit, step_limit, constant_step_time):
@@ -107,8 +118,8 @@ class Game:
     while continue_game:
 
       #update all sprites
-      self.baddie_group.update(self.turret_group.sprites()[0],step_time)
-      self.turret_group.update(self.baddie_group, total_time)
+      self.baddie_group.update(step_time)
+      self.turret_group.update(total_time)
 
       if self.GUI:
         pygame.display.update()
@@ -145,7 +156,8 @@ class Turret(pygame.sprite.Sprite):
   # Constructor
   def __init__(self,position):
     # Call the parent class (Sprite) constructor
-    pygame.sprite.Sprite.__init__(self)  
+    pygame.sprite.Sprite.__init__(self)
+    self.game = None  
 
     self.position = position
     self.radius = 100 # shoot range - circle collision detection
@@ -162,11 +174,11 @@ class Turret(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = position
 
-  def update(self,baddie_group,total_time):
+  def update(self,total_time):
 
     # Check for targets & fire
     if total_time - self.shoot_timestamp > self.reload_time: # reloading
-      hit_list = self._check_for_targets(baddie_group)
+      hit_list = self._check_for_targets(self.game.baddie_group)
       if hit_list:
         self._shoot(hit_list[0]) # shoot first baddie in list only
         self.shoot_timestamp = total_time
@@ -175,7 +187,7 @@ class Turret(pygame.sprite.Sprite):
         self.line = 0
 
     # check for baddies touching turret - end game
-    touch_list = self._check_for_touching(baddie_group)
+    touch_list = self._check_for_touching(self.game.baddie_group)
     if touch_list:
       global continue_game
       continue_game = 0
@@ -200,7 +212,8 @@ class Turret(pygame.sprite.Sprite):
 
 class Baddie(pygame.sprite.Sprite):
   def __init__(self,position,speed=10):
-    pygame.sprite.Sprite.__init__(self)  
+    pygame.sprite.Sprite.__init__(self)
+    self.game = None  
 
     self.position = position
     self.health = 5
@@ -214,20 +227,20 @@ class Baddie(pygame.sprite.Sprite):
     self.velocity = ()
     self.being_shot = 0
 
-  def update(self,turret,time_passed):
-    self._move(turret,time_passed) # miliseconds
-    self._check_touching_turret(turret)
+  def update(self,time_passed):
+    self._move(time_passed) # miliseconds
+    self._check_touching_turret()
     # self._move(turret,time_passed)
 
-  def _check_touching_turret(self,turret):
-    if pygame.sprite.collide_rect(self,turret):
+  def _check_touching_turret(self):
+    if pygame.sprite.collide_rect(self,self.game.turret_group.sprites()[0]):
       print("GAME OVER - BADDIE WIN")
       # return 0
 
   
-  def _move(self,turret,time_passed):
+  def _move(self,time_passed):
     # S - position, V - velocity, l - local, g - global, n - new
-    S_g_a = turret.position
+    S_g_a = self.game.turret_group.sprites()[0].position
     S_g_b = self.position
     # speed
     # dist between (mag), direction (unit), 
@@ -283,10 +296,12 @@ class RenderLines:
 
 def main():
   
+
+
   baddie_list = [ Baddie((300,300),speed=30.0) ]
   turret = Turret((200,200))
 
-  facdustry = Game(baddie_list, turret, GUI=1)
+  facdustry = Game(baddie_list, turret, GUI=1, sound_on=1)
   facdustry.loop(time_limit = 0, step_limit=0, constant_step_time=0)
 
 # if python says run, then we should run
