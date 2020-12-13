@@ -61,23 +61,11 @@ def grid_snap_vector(grid,V):
   ry = math.remainder(V[1],grid[1])
   return(V[0]-rx, V[1]-ry)
 
-# def update_vector_position(vectorA,vectorB,speed,time)
-
 continue_game = 1
-
-# def Factory(entity): 
-  
-#   """Factory Method"""
-#   entities = { 
-#     "baddie": Baddie, 
-#     "turret": Turret, 
-#   } 
-
-# return entities[entity]() 
 
 # set GUI to 1 to display
 class Game:
-  def __init__(self, baddie_list,turret, GUI=1,sound=1):
+  def __init__(self, init_ent_list, GUI=1,sound=1):
     # screen
     self.GUI = GUI
     self.sound = sound
@@ -88,16 +76,6 @@ class Game:
     self.clock = pygame.time.Clock()
     self.events = pygame.event
 
-    # sprites and groups
-    self.baddie_group = pygame.sprite.Group(baddie_list)
-    self.turret_group = pygame.sprite.Group(turret)
-    self.allsprites_group = pygame.sprite.Group(baddie_list,turret)
-    # self.being_shot_group = pygame.sprite.Group()
-
-    # link sprites to game
-    for sprite in self.allsprites_group:
-      sprite.game = self
-
     if self.GUI: # includes sounds
       self.screen = pygame.display.set_mode(self.winsize)
     if self.sound:
@@ -105,32 +83,26 @@ class Game:
       self.laser_sound = pygame.mixer.Sound("pew.ogg")
       # self.sound_list = [] # load sounds list
 
-    # self.continue_game = 1
-  # @property
-  # def allsprites_group(self):
-  #   return self._allsprites_group
+    self.ent_group_dict = {
+      "baddie":pygame.sprite.Group(),
+      "turret":pygame.sprite.Group(),
+      "all":pygame.sprite.Group()
+    }
+    self.add_sprites_to_groups(init_ent_list)
 
-  # @allsprites_group.setter
-  # def allsprites_group(self, *argv):
-  #   # for arg in argv:
-  #   self._allsprites_group = argv
-  #   # for arg in argv:
-  #   #   self._allsprites_group(arg)
 
-  #   for sprite in self._allsprites_group:
-  #     sprite.game = self
 
-  
-    
-    # for obj in list:
-    #   add to game
-    # return sprite group
+  def add_sprites_to_groups(self, list_of_entities):
 
-  # def init(baddie_list, turret):
-  #   self.baddie_group = pygame.sprite.Group(baddie_list)
-  #   self.turret_group = pygame.sprite.Group(turret)
-  #   self.allsprites_group = pygame.sprite.Group(baddie_list,turret)
-
+    for entity_tup in list_of_entities:
+        
+      group_name = entity_tup[0]
+      obj_entity = entity_tup[1]
+      self.ent_group_dict[group_name].add(obj_entity)
+      self.ent_group_dict["all"].add(obj_entity)
+        
+      #link game ref to entity
+      entity_tup[1].game = self
 
   # mouse & keyboard input
   def check_events(self):
@@ -144,10 +116,11 @@ class Game:
       # mouse button baddie creation
       mouse_buttons = pygame.mouse.get_pressed()
       if mouse_buttons[0]:
-        mouse_pos = pygame.mouse.get_pos() # snap object to grid
-        new_baddie = Baddie(mouse_pos, speed=30)
-        new_baddie.game = self
-        new_baddie.add(self.baddie_group,self.allsprites_group)
+        mouse_pos = pygame.mouse.get_pos()
+
+        new_baddie_list = [("baddie",Baddie(mouse_pos, speed=30))]
+        
+        self.add_sprites_to_groups(new_baddie_list)
 
   def loop(self, time_limit=0, step_limit=0, constant_step_time=0):
     total_time = 0
@@ -157,8 +130,7 @@ class Game:
     while continue_game:
 
       #update all sprites
-      self.baddie_group.update(step_time)
-      self.turret_group.update(total_time)
+      self.ent_group_dict["all"].update(step_time,total_time)
 
       if self.GUI:
         pygame.display.update()
@@ -167,8 +139,8 @@ class Game:
 
         self.screen.fill(BLACK)
         # pygame.display.set_caption("BLACK")
-        self.allsprites_group.draw(self.screen)
-        draw_lines(self.screen,self.turret_group)
+        self.ent_group_dict["all"].draw(self.screen)
+        draw_lines(self.screen,self.ent_group_dict["turret"])
         # alllines.draw(self.screen)
 
       if constant_step_time == 0: 
@@ -176,7 +148,6 @@ class Game:
       else:
         step_time = constant_step_time
 
-      
       step += 1
 
       total_time += step_time
@@ -197,7 +168,7 @@ class Turret(pygame.sprite.Sprite):
     # Call the parent class (Sprite) constructor
     pygame.sprite.Sprite.__init__(self)
     self.game = None  
-
+ 
     self.position = position
     self.radius = 100 # shoot range - circle collision detection
     self.ammo = 5
@@ -213,11 +184,11 @@ class Turret(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = position
 
-  def update(self,total_time):
+  def update(self,step_time,total_time):
 
     # Check for targets & fire
     if total_time - self.shoot_timestamp > self.reload_time: # reloading
-      hit_list = self._check_for_targets(self.game.baddie_group)
+      hit_list = self._check_for_targets(self.game.ent_group_dict["baddie"])
       if hit_list:
         self._shoot(hit_list[0]) # shoot first baddie in list only
         self.shoot_timestamp = total_time
@@ -226,13 +197,10 @@ class Turret(pygame.sprite.Sprite):
         self.line = 0
 
     # check for baddies touching turret - end game
-    touch_list = self._check_for_touching(self.game.baddie_group)
+    touch_list = self._check_for_touching(self.game.ent_group_dict["baddie"])
     if touch_list:
       global continue_game
       continue_game = 0
-
-    # for baddie in hit_list:
-    #   self._shoot(baddie)
 
   def _check_for_targets(self,target_group):
     hit_list = []
@@ -267,9 +235,6 @@ class Baddie(pygame.sprite.Sprite):
     # self.rect.center = position
     self.speed = speed # pixels per second - decimal important!
     self.velocity = ()
-  
-  # def _update_rec_pos(self):
-  #   self.rect.center = round_vector(self.position,0)
 
   @property
   def position(self):
@@ -281,53 +246,22 @@ class Baddie(pygame.sprite.Sprite):
     # self.rect.center = grid_snap_vector((10,10),value)
     self._position = value
     self.rect.center = value
-  
-    # @property
 
-    # # setter
-    # def set_position(self,value):
-    #   # print("Setting value...")
-    #     self.position = value
-    #     self.rect.center = value
-
-
-
-    # # creating a property object
-    # position = property(get_position, set_position)
-
-  # def snap_pos_to_grid(self, coord):
-  #   return grid_snap_vector((10,10),coord)
-
-  # @property
-  # def position(self):
-  #   return self.position
-
-  # @position.setter
-  # def position(self, coord):
-  #   # self.position = grid_snap_vector((10,10),coord)
-  #   self.position = coord
-
-  
-  # def 
-  #   return self.rect.center = coord
-    # return position, self.rect.center 
-  
-
-  def update(self,time_passed):
-    self._move(time_passed) # miliseconds
+  def update(self,step_time,total_time):
+    self._move(step_time) # miliseconds
     self._check_touching_turret()
     # self._update_rec_pos()  
     # self._move(time_passed)
 
   def _check_touching_turret(self):
-    if pygame.sprite.collide_rect(self,self.game.turret_group.sprites()[0]):
+    if pygame.sprite.collide_rect(self,self.game.ent_group_dict["turret"].sprites()[0]):
       print("GAME OVER - BADDIE WIN")
       # return 0
 
   
   def _move(self,time_passed):
     # S - position, V - velocity, l - local, g - global, n - new
-    S_g_a = self.game.turret_group.sprites()[0].position
+    S_g_a = self.game.ent_group_dict["turret"].sprites()[0].position
     S_g_b = self.position
     # speed
     # dist between (mag), direction (unit), 
@@ -351,7 +285,6 @@ class Baddie(pygame.sprite.Sprite):
       V_l_b_a = self.velocity
 
       S_l_b_bn = vector_scalar_mult(V_l_b_a,time_passed)
-      print(S_l_b_bn)
       S_g_bn = vector_add(S_g_b,S_l_b_bn)
       # print(S_g_bn)
 
@@ -383,12 +316,12 @@ class RenderLines:
 
 def main():
 
-  # factory - produce objects from lists and call within Game class
+  init_ent_list = [
+  ( "baddie",Baddie((300,300),speed=30.0) ),
+  ( "turret",Turret((200,200)) )
+  ]
 
-  baddie_list = [ Baddie((300,300),speed=30.0) ]
-  turret = Turret((200,200))
-
-  facdustry = Game(baddie_list, turret, GUI=1, sound=1)
+  facdustry = Game(init_ent_list, GUI=1, sound=1)
   facdustry.loop(time_limit = 0, step_limit=0, constant_step_time=0)
 
 # if python says run, then we should run
