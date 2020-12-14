@@ -187,7 +187,7 @@ class Turret(pygame.sprite.Sprite):
   def update(self,step_time,total_time):
 
     # Check for targets & fire
-    if total_time - self.shoot_timestamp > self.reload_time: # reloading
+    if not self.reloading(total_time):
       hit_list = self._check_for_targets(self.game.ent_group_dict["baddie"])
       if hit_list:
         self._shoot(hit_list[0]) # shoot first baddie in list only
@@ -201,6 +201,9 @@ class Turret(pygame.sprite.Sprite):
     if touch_list:
       global continue_game
       continue_game = 0
+
+  def reloading(self,total_time):
+    return (total_time - self.shoot_timestamp <= self.reload_time)
 
   def _check_for_targets(self,target_group):
     hit_list = []
