@@ -46,6 +46,25 @@ def vector_scalar_mult(v,a):
   vy = v[1]*a
   return(vx,vy)
 
+def calc_const_velocity(mover, target, speed):
+  """velocity vector between 2 positions with constant speed
+    S - position vector, V - velocity vector
+    m - mover, t - target
+  """
+  # position vector between mover & target
+  S_mt = vector_subtract(target,mover)
+  # distance between mover & target
+  magS_mt = magnitude(S_mt)
+  # direction from mover to target
+  unitS_mt = unit_vector(S_mt)
+
+  return vector_scalar_mult(unitS_mt,speed)
+
+def new_position(position,velocity,time):
+  """change in position over time with constant velocity"""
+  vector_distance = vector_scalar_mult(velocity,time)
+  return vector_add(position,vector_distance)
+
 def magnitude(v):
   mag = math.sqrt(v[0]**2 + v[1]**2)
   return mag
@@ -61,11 +80,14 @@ def grid_snap_vector(grid,V):
   ry = math.remainder(V[1],grid[1])
   return(V[0]-rx, V[1]-ry)
 
-continue_game = 1
+def remove_obj(obj,obj_list):
+  """remove object from list of objects"""
+  return obj_list.remove(obj)
 
 # set GUI to 1 to display
 class Game:
-  def __init__(self, init_ent_list, GUI=1,sound=1):
+  def __init__(self, ent_init_list, GUI=1,sound=1):
+    self.game_over = 0
     # screen
     self.GUI = GUI
     self.sound = sound
@@ -86,23 +108,23 @@ class Game:
     self.ent_group_dict = {
       "baddie":pygame.sprite.Group(),
       "turret":pygame.sprite.Group(),
-      "all":pygame.sprite.Group()
+      "all":pygame.sprite.Group(),
+      "core":pygame.sprite.Group(),
+      "dead":pygame.sprite.Group() # CHANGE: to die
     }
-    self.add_sprites_to_groups(init_ent_list)
+    self.add_sprites_to_groups(ent_init_list)
 
 
 
-  def add_sprites_to_groups(self, list_of_entities):
+  def add_sprites_to_groups(self, entities_list):
 
-    for entity_tup in list_of_entities:
+    for entity in entities_list:
         
-      group_name = entity_tup[0]
-      obj_entity = entity_tup[1]
-      self.ent_group_dict[group_name].add(obj_entity)
-      self.ent_group_dict["all"].add(obj_entity)
+      self.ent_group_dict[entity.type].add(entity)
+      self.ent_group_dict["all"].add(entity)
         
       #link game ref to entity
-      entity_tup[1].game = self
+      entity.game = self
 
   # mouse & keyboard input
   def check_events(self):
@@ -110,27 +132,33 @@ class Game:
 
       # quiting pygame
       if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
-        global continue_game
-        continue_game = 0
+        self.game_over = 1
         break
       # mouse button baddie creation
       mouse_buttons = pygame.mouse.get_pressed()
       if mouse_buttons[0]:
         mouse_pos = pygame.mouse.get_pos()
 
-        new_baddie_list = [("baddie",Baddie(mouse_pos, speed=30))]
+        new_baddie_list = [Baddie(mouse_pos, speed=30)]
         
         self.add_sprites_to_groups(new_baddie_list)
 
+  #=================================================================
   def loop(self, time_limit=0, step_limit=0, constant_step_time=0):
+    """main game loop"""
     total_time = 0
     step_time = 0
     step = 0
-    global continue_game
-    while continue_game:
+ 
+    while not self.game_over:
 
-      #update all sprites
+      # update all sprites
+      #-------------------
       self.ent_group_dict["all"].update(step_time,total_time)
+      # delete dead
+      for ent in self.ent_group_dict["dead"]: # CHANGE
+        ent.kill()
+      # self.ent_group_dict["dead"].empty()
 
       if self.GUI:
         pygame.display.update()
@@ -138,7 +166,6 @@ class Game:
         self.check_events()
 
         self.screen.fill(BLACK)
-        # pygame.display.set_caption("BLACK")
         self.ent_group_dict["all"].draw(self.screen)
         draw_lines(self.screen,self.ent_group_dict["turret"])
         # alllines.draw(self.screen)
@@ -149,15 +176,14 @@ class Game:
         step_time = constant_step_time
 
       step += 1
-
       total_time += step_time
 
       if not time_limit == 0 and total_time >= time_limit:
         # global continue_game
-        continue_game = 0
+        self.game_over = 1
       if not step_limit == 0 and step >= step_limit:
         # global continue_game
-        continue_game = 0
+        self.game_over = 1
 
   pygame.quit()
     
@@ -167,6 +193,7 @@ class Turret(pygame.sprite.Sprite):
   def __init__(self,position):
     # Call the parent class (Sprite) constructor
     pygame.sprite.Sprite.__init__(self)
+    self.type = "turret"
     self.game = None  
  
     self.position = position
@@ -196,12 +223,6 @@ class Turret(pygame.sprite.Sprite):
       else:
         self.line = 0
 
-    # check for baddies touching turret - end game
-    touch_list = self._check_for_touching(self.game.ent_group_dict["baddie"])
-    if touch_list:
-      global continue_game
-      continue_game = 0
-
   def reloading(self,total_time):
     return (total_time - self.shoot_timestamp <= self.reload_time)
 
@@ -220,24 +241,26 @@ class Turret(pygame.sprite.Sprite):
         print("Shoot: ", target)
         if self.game.sound == 1:
           self.game.laser_sound.play()
-        target.kill()
+        target.reduce_health(1) # CHANGE: assign damage
+
+
 
 class Baddie(pygame.sprite.Sprite):
   def __init__(self, initial_pos,speed=10):
     pygame.sprite.Sprite.__init__(self)
+    self.type = "baddie"
     self.game = None
 
-    self.health = 5
+    self.health = 3
 
     self.image = pygame.Surface((10,10))
     self.image.fill(WHITE)
     self.radius = 5 # circle collision detection
     self.rect = self.image.get_rect()
-    self._position = initial_pos # set after rect creation
-    # self._update_rec_pos()
-    # self.rect.center = position
+    self.position = initial_pos # set after rect creation CHANGE
+
     self.speed = speed # pixels per second - decimal important!
-    self.velocity = ()
+    self.velocity = (0,0)
 
   @property
   def position(self):
@@ -245,55 +268,85 @@ class Baddie(pygame.sprite.Sprite):
   
   @position.setter
   def position(self,value):
-    # print("Getting value...")
-    # self.rect.center = grid_snap_vector((10,10),value)
     self._position = value
     self.rect.center = value
 
   def update(self,step_time,total_time):
-    self._move(step_time) # miliseconds
-    self._check_touching_turret()
-    # self._update_rec_pos()  
-    # self._move(time_passed)
-
-  def _check_touching_turret(self):
-    if pygame.sprite.collide_rect(self,self.game.ent_group_dict["turret"].sprites()[0]):
+    """calls internal methods"""
+    print(self.game.ent_group_dict["baddie"])
+    if self._check_for_collisions("core"):
       print("GAME OVER - BADDIE WIN")
-      # return 0
+      self.game.game_over = 1
+    # elif self._check_for_collisions_within_group("baddie"): # colliding with self
+      # self.velocity = self._bounce_velocity()
+    elif self._check_for_collisions("turret"):
+      self.health = 0
+    else:
+      core_position = self._find_nearest_core()
+      self.velocity = self._calc_velocity_to_core(core_position)
 
+    self.position = self._new_position_from_velocity(step_time)
+
+    self._check_dead()
+
+  def _check_for_collisions_within_group(self,group):
+    if self.game.ent_group_dict[group].has(self):
+      tmp_group = self.game.ent_group_dict[group].copy()
+      tmp_group.remove(self)
+      return pygame.sprite.spritecollide(self,tmp_group,False, pygame.sprite.collide_rect)
+
+  def _check_for_collisions(self,group):
+    """list of collided sprites for group"""
+    return pygame.sprite.spritecollide(self,self.game.ent_group_dict[group],False, pygame.sprite.collide_rect)
+
+    # hit_list = pygame.sprite.spritecollide(self,self.game.ent_group_dict[group],False, pygame.sprite.collide_rect)
+    # return hit_list
   
-  def _move(self,time_passed):
-    # S - position, V - velocity, l - local, g - global, n - new
-    S_g_a = self.game.ent_group_dict["turret"].sprites()[0].position
-    S_g_b = self.position
-    # speed
-    # dist between (mag), direction (unit), 
+  def _check_core_collision(self,collided_list):
+    """check if objects belong to group core - game over"""
+    for entity in collided_list:
+      if entity.type is "core":
+        print("GAME OVER - BADDIE WIN")
+        self.game.game_over = 1
 
-    S_l_b_a = vector_subtract(S_g_a,S_g_b)
-    # distance between turret and this baddie
-    magS_l_b_a = magnitude(S_l_b_a)
-    # print(magS_l_b_a)
+  def _bounce_velocity(self):
+    """CHANGE: currently set to bounce off the way it came"""
+    V_dir = -1.5
+    return vector_scalar_mult(self.velocity,V_dir)
 
-    if not magS_l_b_a < 10:
+  def _find_nearest_core(self):
+    """CHANGE - currently returns one core only"""
+    return self.game.ent_group_dict["core"].sprites()[0].position
 
-      # direction of turret from this baddie
-      unitS_l_b_a = unit_vector(S_l_b_a)
-      
-        # print("direction: ", unitS_l_b_a)
-      V_l_b_a = vector_scalar_mult(unitS_l_b_a,self.speed)
-      self.velocity = V_l_b_a
-      # breakpoint()
+  def _calc_velocity_to_core(self,core_position):
+    return calc_const_velocity(self.position, core_position, self.speed)
 
-      # move baddie to new position towards turret
-      V_l_b_a = self.velocity
+  def _new_position_from_velocity(self,step_time):
+    return new_position(self.position,self.velocity,step_time)
 
-      S_l_b_bn = vector_scalar_mult(V_l_b_a,time_passed)
-      S_g_bn = vector_add(S_g_b,S_l_b_bn)
-      # print(S_g_bn)
+  def reduce_health(self,damage):
+    self.health -= damage
+  
+  def _check_dead(self):
+    if self.health <= 0:
+      self.game.ent_group_dict["dead"].add(self)
+  
 
-      self.position= S_g_bn
-      # self.rect.center = S_g_bn
-      # print(self.rect.center)
+class Core(pygame.sprite.Sprite):
+  # Constructor
+  def __init__(self,position):
+    # Call the parent class (Sprite) constructor
+    pygame.sprite.Sprite.__init__(self)
+    self.type = "core"
+    self.game = None  
+ 
+    self.position = position
+    self.radius = 25 # shoot range - circle collision detection
+
+    self.image = pygame.Surface((50,50))
+    self.image.fill(GREEN)
+    self.rect = self.image.get_rect()
+    self.rect.center = position
 
 class Line:
   def __init__(self,colour, start, end):
@@ -304,7 +357,7 @@ class Line:
 def draw_lines(surface,object_group):
   for object in object_group:
     if object.line:
-      pygame.draw.line(surface,object.line.colour,object.line.start,object.line.end)
+      pygame.draw.aaline(surface,object.line.colour,object.line.start,object.line.end)
 
 class RenderLines:
   def __init__(self):
@@ -319,12 +372,14 @@ class RenderLines:
 
 def main():
 
-  init_ent_list = [
-  ( "baddie",Baddie((300,300),speed=30.0) ),
-  ( "turret",Turret((200,200)) )
+  ent_init_list = [
+    Baddie((200,400),speed=30.0),
+    Turret((300,150)),
+    Turret((100,150)),
+    Core((200,50))
   ]
 
-  facdustry = Game(init_ent_list, GUI=1, sound=1)
+  facdustry = Game(ent_init_list, GUI=1, sound=0)
   facdustry.loop(time_limit = 0, step_limit=0, constant_step_time=0)
 
 # if python says run, then we should run
