@@ -42,22 +42,39 @@ class TTD(unittest.TestCase):
     result = game.round_sig_vector(result, 3)
     self.assertEqual((0.707,0.707), result)
 
-  def test_shoot_one_baddie(self):
-    baddie_list = [ game.Baddie((200,250),speed=50) ]
-    turret = game.Turret((100,150))
-    facdustry = game.Game(baddie_list, turret, GUI=0)
-    facdustry.loop(time_limit = 6, step_limit=0, constant_step_time=0)
-    baddie_list = facdustry.baddie_group.sprites()
-    self.assertFalse(baddie_list)
+  def test_grid_snap_vector(self):
+    result = game.grid_snap_vector((20,20),(127.44, 9.0))
+    self.assertEqual((120.0,0), result)
 
-  def test_shoot_one_baddie_within_time(self):
-    # tested from speedsheet calcs
-    baddie_list = [ game.Baddie((100,300),speed=10) ]
-    turret = game.Turret((0,0))
-    facdustry = game.Game(baddie_list, turret, GUI=0)
-    facdustry.loop(time_limit = 32, step_limit=0, constant_step_time=1)
-    baddie_list = facdustry.baddie_group.sprites()
-    self.assertFalse(baddie_list)
+  def test_calc_const_velocity(self):
+    result = game.calc_const_velocity(mover=(125,275), target=(100,200), speed=10)
+    result = game.round_vector(result,1)
+    self.assertEqual((-3.2,-9.5), result)
+
+  def test_new_position(self):
+    result = game.new_position(position=(125,275),velocity=(-3.2,-9.5),time=2)
+    result = game.round_vector(result,1)
+    self.assertEqual((118.6,256.0), result)
+
+  # def test_shoot_one_baddie(self):
+  #   ent_init_list = [
+  #     game.Baddie((200,250),speed=10),
+  #     game.Turret((100,0)),
+  #     game.Core((100,150))
+  #   ]
+  #   facdustry = game.Game(ent_init_list, GUI=0,sound=0)
+  #   facdustry.loop(time_limit = 6, step_limit=0, constant_step_time=0)
+  #   baddie_list = facdustry.ent_group_dict["baddie"].sprites()
+  #   self.assertFalse(baddie_list)
+
+  # def test_shoot_one_baddie_within_time(self):
+  #   # tested from speedsheet calcs
+  #   baddie_list = [ game.Baddie((100,300),speed=10) ]
+  #   turret = game.Turret((0,0))
+  #   facdustry = game.Game(baddie_list, turret, GUI=0,sound=0)
+  #   facdustry.loop(time_limit = 32, step_limit=0, constant_step_time=1)
+  #   baddie_list = facdustry.baddie_group.sprites()
+  #   self.assertFalse(baddie_list)
 
   # test time for baddie to be destroyed
 
