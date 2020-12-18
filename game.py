@@ -106,24 +106,20 @@ class Game:
       # self.sound_list = [] # load sounds list
 
     self.ent_group_dict = {
-      "baddie":pygame.sprite.Group(),
-      "turret":pygame.sprite.Group(),
       "all":pygame.sprite.Group(),
-      "core":pygame.sprite.Group(),
-      "dead":pygame.sprite.Group(), # CHANGE: to die
-      "wall":pygame.sprite.Group()
+      "dead":pygame.sprite.Group()
     }
+    self.create_sprite_groups(ent_init_list)
     self.add_sprites_to_groups(ent_init_list)
 
-
+  def create_sprite_groups(self,entities_list):
+    for entity in entities_list:
+      self.ent_group_dict.update({entity.type:pygame.sprite.Group()})
 
   def add_sprites_to_groups(self, entities_list):
-
     for entity in entities_list:
-        
       self.ent_group_dict[entity.type].add(entity)
-      self.ent_group_dict["all"].add(entity)
-        
+      self.ent_group_dict["all"].add(entity)   
       #link game ref to entity
       entity.game = self
 
