@@ -110,7 +110,8 @@ class Game:
       "turret":pygame.sprite.Group(),
       "all":pygame.sprite.Group(),
       "core":pygame.sprite.Group(),
-      "dead":pygame.sprite.Group() # CHANGE: to die
+      "dead":pygame.sprite.Group(), # CHANGE: to die
+      "wall":pygame.sprite.Group()
     }
     self.add_sprites_to_groups(ent_init_list)
 
@@ -273,7 +274,6 @@ class Baddie(pygame.sprite.Sprite):
 
   def update(self,step_time,total_time):
     """calls internal methods"""
-    print(self.game.ent_group_dict["baddie"])
     if self._check_for_collisions("core"):
       print("GAME OVER - BADDIE WIN")
       self.game.game_over = 1
@@ -281,6 +281,9 @@ class Baddie(pygame.sprite.Sprite):
       # self.velocity = self._bounce_velocity()
     elif self._check_for_collisions("turret"):
       self.health = 0
+    elif self._check_for_collisions("wall"):
+      wall_hit = self._check_for_collisions("wall") # CHANGE: check nearest
+      self.velocity = self._bounce_velocity(wall_hit[0],scalar=50)
     else:
       core_position = self._find_nearest_core()
       self.velocity = self._calc_velocity_to_core(core_position)
@@ -309,10 +312,10 @@ class Baddie(pygame.sprite.Sprite):
         print("GAME OVER - BADDIE WIN")
         self.game.game_over = 1
 
-  def _bounce_velocity(self):
-    """CHANGE: currently set to bounce off the way it came"""
-    V_dir = -1.5
-    return vector_scalar_mult(self.velocity,V_dir)
+  def _bounce_velocity(self,obj_hit,scalar=1):
+    """bounce back in the opposite direction of nearest wall block"""
+    dir = calc_const_velocity(self.position, obj_hit.position, speed=1) # speed not needed
+    return vector_scalar_mult(dir,scalar*(-1.0))
 
   def _find_nearest_core(self):
     """CHANGE - currently returns one core only"""
@@ -348,6 +351,20 @@ class Core(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = position
 
+class Wall(pygame.sprite.Sprite):
+  def __init__(self,position):
+    pygame.sprite.Sprite.__init__(self)
+    self.type = "wall"
+    self.game = None 
+
+    self.position = position
+    self.radius = 25 # shoot range - circle collision detection
+
+    self.image = pygame.Surface((10,10))
+    self.image.fill(YELLOW)
+    self.rect = self.image.get_rect()
+    self.rect.center = position
+
 class Line:
   def __init__(self,colour, start, end):
     self.colour = colour
@@ -376,7 +393,10 @@ def main():
     Baddie((200,400),speed=30.0),
     Turret((300,150)),
     Turret((100,150)),
-    Core((200,50))
+    Core((200,50)),
+    Wall((160,280)),
+    Wall((170,280)),
+    Wall((180,280))
   ]
 
   facdustry = Game(ent_init_list, GUI=1, sound=0)
