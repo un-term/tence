@@ -5,12 +5,36 @@ import random
 from general_functions import *
 
 WHITE = (255, 255, 255)
-BLACK = (20, 20, 40)
+BLACK = (0, 0, 0)
 RED =   (255,   0,   0)
 GREEN = (0, 255, 0)
 BLUE = (0,0,255)
 DEEPSKYBLUE = (0,191,255)
 YELLOW = (255,255,0)
+
+class LineSprite(pygame.sprite.Sprite):
+  def __init__(self,colour, start, end):
+  # def __init__(self):
+    pygame.sprite.Sprite.__init__(self)
+    self.type = "laser"
+    self.colour = RED
+    # self.position = (0,0)
+
+    size = vector_abs(vector_subtract(start,end))
+    center = vector_vector_midpoint(end,start)
+    # line midpoint
+
+    self.image = pygame.Surface(size)
+    self.image.fill(BLACK)
+    self.image.set_colorkey(BLACK)
+    
+    self.rect = self.image.get_rect()
+    self.rect.center = center
+    # pygame.draw.aaline(self.image,self.colour,start,end)
+    local_start = coord_sys_map_translation(self.rect.topleft, start)
+    local_end = coord_sys_map_translation(self.rect.topleft, end)
+    pygame.draw.line(self.image,self.colour,local_start,local_end)
+    # line drawn on surface local coordinate system
 
 class Line:
   def __init__(self,colour, start, end):
@@ -49,7 +73,10 @@ class Turret(pygame.sprite.Sprite):
       if hit_list:
         self._shoot(hit_list[0]) # shoot first baddie in list only
         self.shoot_timestamp = total_time
-        self.line=Line(RED, self.position, hit_list[0].position) # laser
+        # self.line=Line(RED, self.position, hit_list[0].position) # laser
+        laser = [ LineSprite(RED, self.position, hit_list[0].position) ]
+        # line[0].draw(self.game.screen)
+        self.game.add_sprites_to_groups(laser)
       else:
         self.line = 0
 
@@ -68,7 +95,7 @@ class Turret(pygame.sprite.Sprite):
 
   def _shoot(self,target):
     if self.ammo > 0:
-        print("Shoot: ", target)
+        # print("Shoot: ", target)
         if self.game.sound == 1:
           self.game.laser_sound.play()
         target.reduce_health(1) # CHANGE: assign damage
@@ -137,7 +164,7 @@ class Baddie(pygame.sprite.Sprite):
   def _check_core_collision(self,collided_list):
     """check if objects belong to group core - game over"""
     for entity in collided_list:
-      if entity.type is "core":
+      if entity.type == "core":
         print("GAME OVER - BADDIE WIN")
         self.game.game_over = 1
 

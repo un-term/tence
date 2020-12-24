@@ -38,7 +38,8 @@ class Game:
 
     self.ent_group_dict = {
       "all":pygame.sprite.Group(),
-      "dead":pygame.sprite.Group()
+      "dead":pygame.sprite.Group(),
+      "laser":pygame.sprite.Group()
     }
     self.create_sprite_groups(ent_init_list)
     self.add_sprites_to_groups(ent_init_list)
@@ -49,6 +50,7 @@ class Game:
 
   def add_sprites_to_groups(self, entities_list):
     for entity in entities_list:
+      # if entity.type == "laser": print("adding laser")
       self.ent_group_dict[entity.type].add(entity)
       self.ent_group_dict["all"].add(entity)   
       #link game ref to entity
@@ -83,9 +85,7 @@ class Game:
       # update all sprites
       #-------------------
       self.ent_group_dict["all"].update(step_time,total_time)
-      # delete dead
-      for ent in self.ent_group_dict["dead"]: # CHANGE
-        ent.kill()
+
       # self.ent_group_dict["dead"].empty()
 
       if self.GUI:
@@ -95,7 +95,8 @@ class Game:
 
         self.screen.fill(BLACK)
         self.ent_group_dict["all"].draw(self.screen)
-        draw_lines(self.screen,self.ent_group_dict["turret"])
+        # self.ent_group_dict["laser"].draw(self.screen)
+        # draw_lines(self.screen,self.ent_group_dict["turret"])
         # alllines.draw(self.screen)
 
       if constant_step_time == 0: 
@@ -113,6 +114,12 @@ class Game:
         # global continue_game
         self.game_over = 1
 
+      # delete dead
+      for ent in self.ent_group_dict["dead"]: # CHANGE
+        ent.kill()
+      for ent in self.ent_group_dict["laser"]: # CHANGE
+        ent.kill()
+
   pygame.quit()
 
 def main():
@@ -124,7 +131,10 @@ def main():
     Core((200,50)),
     Wall((160,280)),
     Wall((170,280)),
-    Wall((180,280))
+    Wall((180,280)),
+    # LineSprite(RED,(200,200),(300,300))
+    # LineSprite(RED,(10,10),(50,50))
+
   ]
 
   facdustry = Game(ent_init_list, GUI=1, sound=0)
