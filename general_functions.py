@@ -14,10 +14,37 @@ def round_vector(V,digits):
   Vy = round(V[1],digits)
   return (Vx,Vy)
 
-def pol2cart(r, phi):
+def pol2cart(V):
+    r = V[0]
+    phi = V[1]
     x = r * math.cos(phi)
     y = r * math.sin(phi)
     return(x, y)
+
+def cart2pol(V):
+  x = V[0]
+  y = V[1]
+  r = magnitude(V)
+  phi = abs(math.atan(y/x))
+  if x > 0 and y > 0:
+    pass
+  elif x < 0 and y > 0:
+    phi = math.pi - phi
+  elif x < 0 and y < 0:
+    phi = math.pi + phi
+  elif x > 0 and y < 0:
+    phi = 2.0*math.pi - phi
+
+  elif x == 0 and y > 0:
+    phi = math.pi/2.0
+  elif x == 0 and y < 0:
+    phi = (3.0/2.0)*math.pi
+  elif x == 0 and y == 0:
+    raise ValueError("Undefined")
+  return(r, phi)
+
+def rad2deg(phi):
+  return phi*(360.0/(2*math.pi))
 
 def vector_add(v1,v2):
   v3_x = v1[0]+v2[0]
@@ -33,6 +60,16 @@ def vector_scalar_mult(v,a):
   vx = v[0]*a
   vy = v[1]*a
   return(vx,vy)
+
+def vector_abs(V):
+  Vx = abs(V[0])
+  Vy = abs(V[1])
+  return(Vx,Vy)
+
+def vector_vector_midpoint(V1,V2):
+  """mindpoint between two vectors"""
+  V_12 = vector_subtract(V2,V1)
+  return vector_add(V1,vector_scalar_mult(V_12,0.5))
 
 def calc_const_velocity(mover, target, speed):
   """velocity vector between 2 positions with constant speed
@@ -67,6 +104,10 @@ def grid_snap_vector(grid,V):
   rx = math.remainder(V[0],grid[0])
   ry = math.remainder(V[1],grid[1])
   return(V[0]-rx, V[1]-ry)
+
+def coord_sys_map_translation(offset, V_g):
+  """mapping global (g) to local (l)"""
+  return vector_subtract(V_g,offset)
 
 def remove_obj(obj,obj_list):
   """remove object from list of objects"""
