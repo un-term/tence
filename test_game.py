@@ -16,10 +16,27 @@ class TTD(unittest.TestCase):
     result = game.round_vector((467.4229,0.0000034),3)
     self.assertEqual((467.423,0),result)
 
+  def test_abs_vector(self):
+    result = game.abs_vector((-0.245,-4.8))
+    self.assertEqual((0.245,4.8),result)
+
   def test_pol2cart(self):
-    result = game.pol2cart(1,3*(math.pi*0.5))
+    result = game.pol2cart((1,3*(math.pi*0.5)))
     result = game.round_vector((result), 6)
     self.assertEqual((0,-1), result)
+
+  def test_cart2pol(self):
+    # result = game.cart2pol((2,2))
+    # result = game.round_vector((result), 2)
+    # self.assertEqual((2.83,round(math.pi/4.0,2)), result)
+    result = game.cart2pol((-2,-3))
+    result = game.round_vector((result), 2)
+    self.assertEqual((3.61,4.12), result)
+
+  def test_rad2deg(self):
+    result = game.rad2deg(math.pi/4.0)
+    result = round(result, 2)
+    self.assertEqual(45.00, result)
 
   def test_vector_add(self):
     result = game.vector_add((-2,3),(1,-3))
@@ -41,6 +58,10 @@ class TTD(unittest.TestCase):
     result = game.unit_vector((5,5))
     result = game.round_sig_vector(result, 3)
     self.assertEqual((0.707,0.707), result)
+
+  def test_vector_vector_midpoint(self):
+    result = game.vector_vector_midpoint((1,1),(3,3))
+    self.assertEqual((2,2), result)
 
   def test_grid_snap_vector(self):
     result = game.grid_snap_vector((20,20),(127.44, 9.0))
