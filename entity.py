@@ -87,10 +87,8 @@ class Turret(pygame.sprite.Sprite):
     if self.ammo > 0:
         # print("Shoot: ", target)
         if self.game.sound == 1:
-          self.game.laser_sound.play()
+          self.game.sound.laser_sound.play()
         target.reduce_health(1) # CHANGE: assign damage
-
-
 
 class Baddie(pygame.sprite.Sprite):
   def __init__(self, initial_pos,speed=10):
