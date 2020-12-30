@@ -58,9 +58,6 @@ class EntityGroup:
     for entity in entity_list:
       entity.game = self.game
 
-  # def __len__(self):
-  #   return len(self.dict)
-
   def get_group(self,group_name):
     group = self.dict[group_name]
 
@@ -71,6 +68,8 @@ class EntityGroup:
     else:
       return group
 
+  # def __len__(self):
+  #   return len(self.dict)
 
   # def __getitem__(self, key): # x[key]
   #   """change - introduce more checks"""
@@ -88,14 +87,3 @@ class EntityGroup:
   #     raise TypeError('not indexable')
     
   #   self.dict[key] = value
-
-
-
-    # for item in self.list:
-    #     if item.name == key: found.append(item)
-    # if not found:
-    #     raise KeyError(key)
-    # if len(found) == 1:
-    #     return found[0]
-    # else:
-    #     return found

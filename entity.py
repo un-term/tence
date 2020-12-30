@@ -19,11 +19,9 @@ class LineSprite(pygame.sprite.Sprite):
     self.type = "laser"
     self.game = None 
     self.colour = RED
-    # self.position = (0,0)
 
     size = vector_abs(vector_subtract(start,end))
     center = vector_vector_midpoint(end,start)
-    # line midpoint
 
     self.image = pygame.Surface(size)
     self.image.fill(BLACK)
@@ -36,12 +34,6 @@ class LineSprite(pygame.sprite.Sprite):
     local_end = coord_sys_map_translation(self.rect.topleft, end)
     pygame.draw.line(self.image,self.colour,local_start,local_end,2)
     # line drawn on surface local coordinate system
-
-class Line:
-  def __init__(self,colour, start, end):
-    self.colour = colour
-    self.start = start
-    self.end = end
 
 class Turret(pygame.sprite.Sprite):
   # Constructor
@@ -56,7 +48,6 @@ class Turret(pygame.sprite.Sprite):
     self.ammo = 5
     self.reload_time = 0.2
     self.shoot_timestamp = 0
-    self.line = 0 # CHANGE
 
     # body
     self.image = pygame.Surface((30,30))
@@ -78,8 +69,6 @@ class Turret(pygame.sprite.Sprite):
         laser = LineSprite(RED, self.position, hit_list[0].position)
         # line[0].draw(self.game.screen)
         self.game.entity_group.add_ent([laser],["draw","remove"])
-      else:
-        self.line = 0
 
   def reloading(self,total_time):
     return (total_time - self.shoot_timestamp <= self.reload_time)

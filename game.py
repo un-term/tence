@@ -12,12 +12,6 @@ from entity_group import EntityGroup
 
 WINSIZE = [640, 480]
 
-def draw_lines(surface,object_group):
-  for object in object_group:
-    if object.line:
-      pygame.draw.aaline(surface,object.line.colour,object.line.start,object.line.end)
-
-# set GUI to 1 to display
 class Game:
   def __init__(self, ent_init_list, GUI=1,sound=1):
     self.game_over = 0
@@ -31,7 +25,6 @@ class Game:
     self.clock = pygame.time.Clock()
     self.events = pygame.event
 
-    # create objects and check if they exist to use them
     if self.GUI: # includes sounds
       self.screen = pygame.display.set_mode(self.winsize)
     if self.sound:
@@ -54,11 +47,8 @@ class Game:
       mouse_buttons = pygame.mouse.get_pressed()
       if mouse_buttons[0]:
         mouse_pos = pygame.mouse.get_pos()
-
-        # new_baddie_list = [Baddie(mouse_pos, speed=30)]
         
         self.entity_group.add_ent([Baddie(mouse_pos, speed=30)])
-        # self.add_sprites_to_groups(new_baddie_list)
 
   #=================================================================
   def loop(self, time_limit=0, step_limit=0, constant_step_time=0):
@@ -80,9 +70,6 @@ class Game:
 
         self.screen.fill(BLACK)
         self.entity_group.get_group("draw").draw(self.screen)
-        # self.ent_group_dict["laser"].draw(self.screen)
-        # draw_lines(self.screen,self.ent_group_dict["turret"])
-        # alllines.draw(self.screen)
 
       if constant_step_time == 0: 
         step_time = self.clock.tick(60)/1000.0 # miliseconds to seconds
@@ -93,13 +80,11 @@ class Game:
       total_time += step_time
 
       if not time_limit == 0 and total_time >= time_limit:
-        # global continue_game
         self.game_over = 1
       if not step_limit == 0 and step >= step_limit:
-        # global continue_game
         self.game_over = 1
 
-      # remove dead
+      # remove dead & other ephemeral entities 
       self.entity_group.remove_ent_from_group(["remove"])
 
   pygame.quit()
