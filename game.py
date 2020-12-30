@@ -10,45 +10,60 @@ from entity import *
 from general_functions import *
 from entity_group import EntityGroup
 
-WINSIZE = [640, 480]
+class GUI:
+  def __init__(self):
+    self.display = pygame.display
+  def start_display(self,winsize=[640, 480]):
+    self.screen = self.display.set_mode(winsize)
+
+class Sound:
+  """CHANGE: import list of sound files"""
+  def __init__(self):
+    self.mixer = pygame.mixer
+    self.mixer.init()
+    self.laser_sound = pygame.mixer.Sound("pew.ogg")
+
+class Event:
+  def __init__(self):
+    self.game = None
+    self.event = pygame.event
+
+  def check_event(self):
+    for event in self.event.get():
+      self._check_quit(event)
+      self._check_click()
+
+  def _check_quit(self,event):
+    if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
+      self.game.game_over = 1
+
+  def _check_click(self):
+    mouse_buttons = pygame.mouse.get_pressed()
+    if mouse_buttons[0]:
+      mouse_pos = pygame.mouse.get_pos()
+      self.game.entity_group.add_ent([Baddie(mouse_pos, speed=30)])
+
 
 class Game:
-  def __init__(self, ent_init_list, GUI=1,sound=1):
+  def __init__(self, ent_init_list, gui=None, event=None,sound=None):
     self.game_over = 0
     # screen
-    self.GUI = GUI
+    self.gui = gui
+    self.event = event
     self.sound = sound
 
     self.winsize = (400,400)
     self.grid = (20,20)
 
     self.clock = pygame.time.Clock()
-    self.events = pygame.event
-
-    if self.GUI: # includes sounds
-      self.screen = pygame.display.set_mode(self.winsize)
-    if self.sound:
-      pygame.mixer.init()
-      self.laser_sound = pygame.mixer.Sound("pew.ogg")
-      # self.sound_list = [] # load sounds list
 
     self.entity_group = EntityGroup(self) # linking objects
     self.entity_group.add_ent(ent_init_list)
 
-  # mouse & keyboard input
-  def check_events(self):
-    for event in self.events.get():
-
-      # quiting pygame
-      if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
-        self.game_over = 1
-        break
-      # mouse button baddie creation
-      mouse_buttons = pygame.mouse.get_pressed()
-      if mouse_buttons[0]:
-        mouse_pos = pygame.mouse.get_pos()
-        
-        self.entity_group.add_ent([Baddie(mouse_pos, speed=30)])
+    if gui: 
+      self.gui.start_display(winsize=[640, 480])
+      if event:
+        self.event.game=self
 
   #=================================================================
   def loop(self, time_limit=0, step_limit=0, constant_step_time=0):
@@ -63,13 +78,12 @@ class Game:
       #-------------------------------------------------------------
       self.entity_group.get_group("all").update(step_time,total_time)
 
-      if self.GUI:
-        pygame.display.update()
-
-        self.check_events()
-
-        self.screen.fill(BLACK)
-        self.entity_group.get_group("draw").draw(self.screen)
+      if self.gui:
+        self.gui.display.update()
+        self.gui.screen.fill(BLACK)
+        self.entity_group.get_group("draw").draw(self.gui.screen)
+        if self.event:
+          self.event.check_event()
 
       if constant_step_time == 0: 
         step_time = self.clock.tick(60)/1000.0 # miliseconds to seconds
@@ -102,7 +116,11 @@ def main():
     Wall((180,280))
   ]
 
-  facdustry = Game(ent_init_list, GUI=1, sound=0)
+  gui = GUI()
+  sound = Sound()
+  event = Event()
+
+  facdustry = Game(ent_init_list,gui,event, sound=None)
   facdustry.loop(time_limit = 0, step_limit=0, constant_step_time=0)
 
 # if python says run, then we should run
