@@ -17,6 +17,7 @@ class LineSprite(pygame.sprite.Sprite):
   # def __init__(self):
     pygame.sprite.Sprite.__init__(self)
     self.type = "laser"
+    self.game = None 
     self.colour = RED
     # self.position = (0,0)
 
@@ -33,7 +34,7 @@ class LineSprite(pygame.sprite.Sprite):
     # pygame.draw.aaline(self.image,self.colour,start,end)
     local_start = coord_sys_map_translation(self.rect.topleft, start)
     local_end = coord_sys_map_translation(self.rect.topleft, end)
-    pygame.draw.line(self.image,self.colour,local_start,local_end)
+    pygame.draw.line(self.image,self.colour,local_start,local_end,2)
     # line drawn on surface local coordinate system
 
 class Line:
@@ -53,9 +54,9 @@ class Turret(pygame.sprite.Sprite):
     self.position = position
     self.radius = 100 # shoot range - circle collision detection
     self.ammo = 5
-    self.reload_time = 0.05
+    self.reload_time = 0.2
     self.shoot_timestamp = 0
-    self.line = 0 
+    self.line = 0 # CHANGE
 
     # body
     self.image = pygame.Surface((30,30))
@@ -69,14 +70,14 @@ class Turret(pygame.sprite.Sprite):
 
     # Check for targets & fire
     if not self.reloading(total_time):
-      hit_list = self._check_for_targets(self.game.ent_group_dict["baddie"])
+      hit_list = self._check_for_targets(self.game.entity_group.get_group("baddie"))
       if hit_list:
         self._shoot(hit_list[0]) # shoot first baddie in list only
         self.shoot_timestamp = total_time
         # self.line=Line(RED, self.position, hit_list[0].position) # laser
-        laser = [ LineSprite(RED, self.position, hit_list[0].position) ]
+        laser = LineSprite(RED, self.position, hit_list[0].position)
         # line[0].draw(self.game.screen)
-        self.game.add_sprites_to_groups(laser)
+        self.game.entity_group.add_ent([laser],["draw","remove"])
       else:
         self.line = 0
 
@@ -108,10 +109,10 @@ class Baddie(pygame.sprite.Sprite):
     self.type = "baddie"
     self.game = None
 
-    self.health = 3
+    self.health = 2
 
     self.image = pygame.Surface((10,10))
-    self.image.fill(WHITE)
+    self.image.fill(RED)
     self.radius = 5 # circle collision detection
     self.rect = self.image.get_rect()
     self.position = initial_pos # set after rect creation CHANGE
@@ -148,15 +149,15 @@ class Baddie(pygame.sprite.Sprite):
 
     self._check_dead()
 
-  def _check_for_collisions_within_group(self,group):
-    if self.game.ent_group_dict[group].has(self):
-      tmp_group = self.game.ent_group_dict[group].copy()
-      tmp_group.remove(self)
-      return pygame.sprite.spritecollide(self,tmp_group,False, pygame.sprite.collide_rect)
+  # def _check_for_collisions_within_group(self,group):
+  #   if self.game.ent_group_dict[group].has(self):
+  #     tmp_group = self.game.ent_group_dict[group].copy()
+  #     tmp_group.remove(self)
+  #     return pygame.sprite.spritecollide(self,tmp_group,False, pygame.sprite.collide_rect)
 
   def _check_for_collisions(self,group):
     """list of collided sprites for group"""
-    return pygame.sprite.spritecollide(self,self.game.ent_group_dict[group],False, pygame.sprite.collide_rect)
+    return pygame.sprite.spritecollide(self,self.game.entity_group.get_group(group),False, pygame.sprite.collide_rect)
 
     # hit_list = pygame.sprite.spritecollide(self,self.game.ent_group_dict[group],False, pygame.sprite.collide_rect)
     # return hit_list
@@ -175,7 +176,7 @@ class Baddie(pygame.sprite.Sprite):
 
   def _find_nearest_core(self):
     """CHANGE - currently returns one core only"""
-    return self.game.ent_group_dict["core"].sprites()[0].position
+    return self.game.entity_group.get_group("core").sprites()[0].position
 
   def _calc_velocity_to_core(self,core_position):
     return calc_const_velocity(self.position, core_position, self.speed)
@@ -188,7 +189,8 @@ class Baddie(pygame.sprite.Sprite):
   
   def _check_dead(self):
     if self.health <= 0:
-      self.game.ent_group_dict["dead"].add(self)
+      # self.game.entity_group["remove"].add(self)
+      self.game.entity_group.add_ent([self],["remove"])
   
 
 class Core(pygame.sprite.Sprite):

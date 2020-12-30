@@ -3,10 +3,12 @@
 import pygame
 import math
 import random
+# from multipledispatch import dispatch
 
 # user modules
 from entity import *
 from general_functions import *
+from entity_group import EntityGroup
 
 WINSIZE = [640, 480]
 
@@ -29,6 +31,7 @@ class Game:
     self.clock = pygame.time.Clock()
     self.events = pygame.event
 
+    # create objects and check if they exist to use them
     if self.GUI: # includes sounds
       self.screen = pygame.display.set_mode(self.winsize)
     if self.sound:
@@ -36,25 +39,8 @@ class Game:
       self.laser_sound = pygame.mixer.Sound("pew.ogg")
       # self.sound_list = [] # load sounds list
 
-    self.ent_group_dict = {
-      "all":pygame.sprite.Group(),
-      "dead":pygame.sprite.Group(),
-      "laser":pygame.sprite.Group()
-    }
-    self.create_sprite_groups(ent_init_list)
-    self.add_sprites_to_groups(ent_init_list)
-
-  def create_sprite_groups(self,entities_list):
-    for entity in entities_list:
-      self.ent_group_dict.update({entity.type:pygame.sprite.Group()})
-
-  def add_sprites_to_groups(self, entities_list):
-    for entity in entities_list:
-      # if entity.type == "laser": print("adding laser")
-      self.ent_group_dict[entity.type].add(entity)
-      self.ent_group_dict["all"].add(entity)   
-      #link game ref to entity
-      entity.game = self
+    self.entity_group = EntityGroup(self) # linking objects
+    self.entity_group.add_ent(ent_init_list)
 
   # mouse & keyboard input
   def check_events(self):
@@ -69,9 +55,10 @@ class Game:
       if mouse_buttons[0]:
         mouse_pos = pygame.mouse.get_pos()
 
-        new_baddie_list = [Baddie(mouse_pos, speed=30)]
+        # new_baddie_list = [Baddie(mouse_pos, speed=30)]
         
-        self.add_sprites_to_groups(new_baddie_list)
+        self.entity_group.add_ent([Baddie(mouse_pos, speed=30)])
+        # self.add_sprites_to_groups(new_baddie_list)
 
   #=================================================================
   def loop(self, time_limit=0, step_limit=0, constant_step_time=0):
@@ -83,10 +70,8 @@ class Game:
     while not self.game_over:
 
       # update all sprites
-      #-------------------
-      self.ent_group_dict["all"].update(step_time,total_time)
-
-      # self.ent_group_dict["dead"].empty()
+      #-------------------------------------------------------------
+      self.entity_group.get_group("all").update(step_time,total_time)
 
       if self.GUI:
         pygame.display.update()
@@ -94,7 +79,7 @@ class Game:
         self.check_events()
 
         self.screen.fill(BLACK)
-        self.ent_group_dict["all"].draw(self.screen)
+        self.entity_group.get_group("draw").draw(self.screen)
         # self.ent_group_dict["laser"].draw(self.screen)
         # draw_lines(self.screen,self.ent_group_dict["turret"])
         # alllines.draw(self.screen)
@@ -114,27 +99,22 @@ class Game:
         # global continue_game
         self.game_over = 1
 
-      # delete dead
-      for ent in self.ent_group_dict["dead"]: # CHANGE
-        ent.kill()
-      for ent in self.ent_group_dict["laser"]: # CHANGE
-        ent.kill()
+      # remove dead
+      self.entity_group.remove_ent_from_group(["remove"])
 
   pygame.quit()
 
 def main():
 
   ent_init_list = [
-    Baddie((200,400),speed=30.0),
+    Baddie((200,400),speed=50.0),
     Turret((300,150)),
     Turret((100,150)),
     Core((200,50)),
+    Wall((150,280)),
     Wall((160,280)),
     Wall((170,280)),
-    Wall((180,280)),
-    # LineSprite(RED,(200,200),(300,300))
-    # LineSprite(RED,(10,10),(50,50))
-
+    Wall((180,280))
   ]
 
   facdustry = Game(ent_init_list, GUI=1, sound=0)
