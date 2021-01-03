@@ -37,15 +37,18 @@ class EntityGroup:
   def _add_ent_to_default_group(self,entity_list):
     for entity in entity_list:
       for group in self.default_add_ent_group:
+        if not entity in self.dict[group]:
         self.dict[group].add(entity)
 
   def _add_ent_to_own_group(self,entity_list):
     for entity in entity_list:
+      if not entity in self.dict[entity.type]:
        self.dict[entity.type].add(entity)
 
   def _add_ent_from_list(self,entity_list,group_list):
     for entity in entity_list:
       for group in group_list:
+        if not entity in self.dict[group]:
         self.dict[group].add(entity)
 
   def remove_ent_from_group(self, group_list):
