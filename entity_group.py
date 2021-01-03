@@ -51,7 +51,7 @@ class EntityGroup:
         if not entity in self.dict[group]:
         self.dict[group].add(entity)
 
-  def remove_ent_from_group(self, group_list):
+  def rm_ent_from_all_groups(self, group_list):
     """remove entities in this list of groups from all groups"""
     for group in group_list:
       for entity in self.dict[group]:
