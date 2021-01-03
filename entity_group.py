@@ -57,9 +57,9 @@ class EntityGroup:
       for entity in self.dict[group]:
         entity.kill()
 
-  def link_ent_to_game(self,entity_list):
+  def link_ent_to_entity_group(self,entity_list):
     for entity in entity_list:
-      entity.game = self.game
+      entity.entity_group = self
 
   def get_group(self,group_name):
     group = self.dict[group_name]
