@@ -3,14 +3,7 @@ import math
 import random
 
 from general_functions import *
-
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED =   (255,   0,   0)
-GREEN = (0, 255, 0)
-BLUE = (0,0,255)
-DEEPSKYBLUE = (0,191,255)
-YELLOW = (255,255,0)
+from constants import *
 
 class LineSprite(pygame.sprite.Sprite):
   def __init__(self,colour, start, end):
