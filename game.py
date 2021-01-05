@@ -86,6 +86,8 @@ class Game:
         self.entity_group.get_group("draw").draw(self.gui.screen)
         if self.event:
           self.event.check_event()
+        if self.sound:
+          self.sound
 
       if constant_step_time == 0: 
         step_time = self.clock.tick(60)/1000.0 # miliseconds to seconds
