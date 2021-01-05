@@ -108,7 +108,3 @@ def grid_snap_vector(grid,V):
 def coord_sys_map_translation(offset, V_g):
   """mapping global (g) to local (l)"""
   return vector_subtract(V_g,offset)
-
-def remove_obj(obj,obj_list):
-  """remove object from list of objects"""
-  return obj_list.remove(obj)
