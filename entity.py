@@ -196,6 +196,21 @@ class Core(pygame.sprite.Sprite):
     self.rect.center = position
 
     self.health = 20
+
+  def update(self,step_time,total_time):
+    self._check_dead()
+    self._check_health()
+
+  def _check_dead(self):
+    """CHANGE - adding entities to game_over group to avoid having to know game object"""
+    if self.health < 0:
+      self.entity_group.add_ent([self],["game_over"])
+      print("game over")
+
+  def _check_health(self):
+    if self.health < 10:
+      self.image.fill(RED)
+
 class Wall(pygame.sprite.Sprite):
   def __init__(self,position):
     pygame.sprite.Sprite.__init__(self)
