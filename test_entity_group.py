@@ -77,6 +77,19 @@ class TestEntityGroup(unittest.TestCase):
     result = len(entity_group.get_group("all"))
     self.assertEqual(2, result)
 
+  def test_adding_duplicate(self):
+    """duplicates should not be added"""
+
+    b = Baddie((200,400))
+
+    entity_group = EntityGroup()
+    entity_group.add_ent([b])   
+
+    entity_group.add_ent([b])
+
+    result = len(entity_group.get_group("all"))
+    self.assertEqual(1, result)
+
 if __name__ == '__main__':
   unittest.main()
 
