@@ -141,12 +141,12 @@ class Baddie(pygame.sprite.Sprite):
   #     tmp_group.remove(self)
   #     return pygame.sprite.spritecollide(self,tmp_group,False, pygame.sprite.collide_rect)
 
-  def _check_for_collisions(self,group):
+  def _check_for_collisions(self,group_list):
     """list of collided sprites for group"""
-    return pygame.sprite.spritecollide(self,self.game.entity_group.get_group(group),False, pygame.sprite.collide_rect)
-
-    # hit_list = pygame.sprite.spritecollide(self,self.game.ent_group_dict[group],False, pygame.sprite.collide_rect)
-    # return hit_list
+    cld_list = []
+    for group in group_list:
+      cld_list += pygame.sprite.spritecollide(self,self.entity_group.get_group(group),False, pygame.sprite.collide_rect)
+    return cld_list
   
   def _check_core_collision(self,collided_list):
     """check if objects belong to group core - game over"""
