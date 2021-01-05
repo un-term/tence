@@ -34,7 +34,7 @@ class Event:
   def check_event(self):
     for event in self.event.get():
       self._check_quit(event)
-      self._check_click()
+      self._check_click() # CHANGE - not dependent on pygame events
 
   def _check_quit(self,event):
     if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
@@ -50,8 +50,7 @@ class Event:
 class Game:
   def __init__(self, ent_init_list, gui=None, event=None,sound=None):
     self.game_over = 0
-    # screen
-    self.gui = gui
+    self.gui = gui # screen
     self.event = event
     self.sound = sound
 
