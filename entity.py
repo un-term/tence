@@ -28,6 +28,9 @@ class LineSprite(pygame.sprite.Sprite):
     pygame.draw.line(self.image,self.colour,local_start,local_end,2)
     # line drawn on surface local coordinate system
 
+  def update(self,step_time,total_time):
+    pass
+
 class Turret(pygame.sprite.Sprite):
   # Constructor
   def __init__(self,position):
@@ -200,3 +203,6 @@ class Wall(pygame.sprite.Sprite):
     self.image.fill(YELLOW)
     self.rect = self.image.get_rect()
     self.rect.center = position
+
+  def update(self,step_time,total_time):
+    pass
