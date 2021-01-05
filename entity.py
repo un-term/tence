@@ -203,7 +203,6 @@ class Wall(pygame.sprite.Sprite):
     self.type = "wall"
 
     self.position = position
-    self.radius = 25 # shoot range - circle collision detection
 
     self.image = pygame.Surface((10,10))
     self.image.fill(YELLOW)
