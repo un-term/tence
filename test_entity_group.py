@@ -60,7 +60,7 @@ class TestEntityGroup(unittest.TestCase):
     entity_group.add_ent(ent_init_list,["remove"])
     result = len(entity_group.dict["remove"].sprites())
 
-    entity_group.remove_ent_from_group(["remove"])
+    entity_group.rm_ent_from_all_groups(["remove"])
     result -= len(entity_group.dict["remove"].sprites())
     self.assertEqual(5, result)
 
