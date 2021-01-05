@@ -101,7 +101,9 @@ class Game:
         self.game_over = 1
 
       # remove dead & other ephemeral entities 
-      self.entity_group.remove_ent_from_group(["remove"])
+      # check if game over
+      if self.entity_group.get_group("game_over"):
+        self.game_over = 1
 
   pygame.quit()
 
