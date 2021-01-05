@@ -88,7 +88,7 @@ class Turret(pygame.sprite.Sprite):
       # self.game.sound.laser_sound.play()
 
 class Baddie(pygame.sprite.Sprite):
-  def __init__(self, initial_pos,speed=10):
+  def __init__(self, initial_pos,speed=10.0):
     pygame.sprite.Sprite.__init__(self)
     self.entity_group = None
     self.type = "baddie"
