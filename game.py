@@ -57,7 +57,7 @@ class Game:
 
     self.clock = pygame.time.Clock()
 
-    self.entity_group = EntityGroup(self) # linking objects
+    self.entity_group = EntityGroup() # linking objects
     self.entity_group.add_ent(ent_init_list)
 
     if gui: 

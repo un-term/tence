@@ -9,8 +9,8 @@ class LineSprite(pygame.sprite.Sprite):
   def __init__(self,colour, start, end):
   # def __init__(self):
     pygame.sprite.Sprite.__init__(self)
+    self.entity_group = None
     self.type = "laser"
-    self.game = None 
     self.colour = RED
 
     size = vector_abs(vector_subtract(start,end))
@@ -33,8 +33,8 @@ class Turret(pygame.sprite.Sprite):
   def __init__(self,position):
     # Call the parent class (Sprite) constructor
     pygame.sprite.Sprite.__init__(self)
+    self.entity_group = None
     self.type = "turret"
-    self.game = None  
  
     self.position = position
     self.radius = 100 # shoot range - circle collision detection
@@ -54,14 +54,14 @@ class Turret(pygame.sprite.Sprite):
 
     # Check for targets & fire
     if not self.reloading(total_time):
-      hit_list = self._check_for_targets(self.game.entity_group.get_group("baddie"))
+      hit_list = self._check_for_targets(self.entity_group.get_group("baddie"))
       if hit_list:
         self._shoot(hit_list[0]) # shoot first baddie in list only
         self.shoot_timestamp = total_time
         # self.line=Line(RED, self.position, hit_list[0].position) # laser
         laser = LineSprite(RED, self.position, hit_list[0].position)
         # line[0].draw(self.game.screen)
-        self.game.entity_group.add_ent([laser],["draw","remove"])
+        self.entity_group.add_ent([laser],["draw","remove"])
 
   def reloading(self,total_time):
     return (total_time - self.shoot_timestamp <= self.reload_time)
@@ -86,8 +86,8 @@ class Turret(pygame.sprite.Sprite):
 class Baddie(pygame.sprite.Sprite):
   def __init__(self, initial_pos,speed=10):
     pygame.sprite.Sprite.__init__(self)
+    self.entity_group = None
     self.type = "baddie"
-    self.game = None
 
     self.health = 2
 
@@ -156,7 +156,7 @@ class Baddie(pygame.sprite.Sprite):
 
   def _find_nearest_core(self):
     """CHANGE - currently returns one core only"""
-    return self.game.entity_group.get_group("core").sprites()[0].position
+    return self.entity_group.get_group("core").sprites()[0].position
 
   def _calc_velocity_to_core(self,core_position):
     return calc_const_velocity(self.position, core_position, self.speed)
@@ -170,7 +170,7 @@ class Baddie(pygame.sprite.Sprite):
   def _check_dead(self):
     if self.health <= 0:
       # self.game.entity_group["remove"].add(self)
-      self.game.entity_group.add_ent([self],["remove"])
+      self.entity_group.add_ent([self],["remove"])
   
 
 class Core(pygame.sprite.Sprite):
@@ -178,8 +178,8 @@ class Core(pygame.sprite.Sprite):
   def __init__(self,position):
     # Call the parent class (Sprite) constructor
     pygame.sprite.Sprite.__init__(self)
+    self.entity_group = None
     self.type = "core"
-    self.game = None  
  
     self.position = position
     self.radius = 25 # shoot range - circle collision detection
@@ -192,8 +192,8 @@ class Core(pygame.sprite.Sprite):
 class Wall(pygame.sprite.Sprite):
   def __init__(self,position):
     pygame.sprite.Sprite.__init__(self)
+    self.entity_group = None
     self.type = "wall"
-    self.game = None 
 
     self.position = position
     self.radius = 25 # shoot range - circle collision detection

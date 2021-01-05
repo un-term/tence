@@ -2,8 +2,7 @@ import pygame
 
 class EntityGroup:
   """all imported entities are being drawn"""
-  def __init__(self,game_ref):
-    self.game = game_ref
+  def __init__(self):
     
     self.dict = {}
 
