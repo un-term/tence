@@ -117,16 +117,20 @@ class Baddie(pygame.sprite.Sprite):
 
   def update(self,step_time,total_time):
     """calls internal methods"""
-    if self._check_for_collisions("core"):
-      print("GAME OVER - BADDIE WIN")
-      self.game.game_over = 1
-    # elif self._check_for_collisions_within_group("baddie"): # colliding with self
-      # self.velocity = self._bounce_velocity()
-    elif self._check_for_collisions("turret"):
+    colsn_list = self._check_for_collisions(["core","turret","wall"])
+    # colsn_list.remove(self)
+    # colsn_list = remove_obj(self,colsn_list)
+    bouncing = 0
+    if colsn_list:
+      for ent in colsn_list:
+        if ent.type == "core": 
+          self._do_damage(ent,self.damage)
       self.health = 0
-    elif self._check_for_collisions("wall"):
-      wall_hit = self._check_for_collisions("wall") # CHANGE: check nearest
-      self.velocity = self._bounce_velocity(wall_hit[0],scalar=50)
+          # print("core colliding")
+        elif ent.type == "turret": self.health = 0
+        elif ent.type == "wall" and bouncing == 0: #only bounc off 1 wall at at ime
+          self.velocity = self._bounce_velocity(ent,scalar=50)
+          bouncing = 1
     else:
       core_position = self._find_nearest_core()
       self.velocity = self._calc_velocity_to_core(core_position)
