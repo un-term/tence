@@ -25,7 +25,7 @@ class LineSprite(pygame.sprite.Sprite):
     # pygame.draw.aaline(self.image,self.colour,start,end)
     local_start = coord_sys_map_translation(self.rect.topleft, start)
     local_end = coord_sys_map_translation(self.rect.topleft, end)
-    pygame.draw.line(self.image,self.colour,local_start,local_end,2)
+    pygame.draw.line(self.image,self.colour,local_start,local_end,3)
     # line drawn on surface local coordinate system
 
   def update(self,step_time,total_time):
