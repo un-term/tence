@@ -148,13 +148,6 @@ class Baddie(pygame.sprite.Sprite):
       cld_list += pygame.sprite.spritecollide(self,self.entity_group.get_group(group),False, pygame.sprite.collide_rect)
     return cld_list
   
-  def _check_core_collision(self,collided_list):
-    """check if objects belong to group core - game over"""
-    for entity in collided_list:
-      if entity.type == "core":
-        print("GAME OVER - BADDIE WIN")
-        self.game.game_over = 1
-
   def _bounce_velocity(self,obj_hit,scalar=1):
     """bounce back in the opposite direction of nearest wall block"""
     dir = calc_const_velocity(self.position, obj_hit.position, speed=1) # speed not needed
