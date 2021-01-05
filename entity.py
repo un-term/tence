@@ -125,8 +125,8 @@ class Baddie(pygame.sprite.Sprite):
       for ent in colsn_list:
         if ent.type == "core": 
           self._do_damage(ent,self.damage)
-      self.health = 0
-          # print("core colliding")
+          self.health = 0
+        # print("core colliding")
         elif ent.type == "turret": self.health = 0
         elif ent.type == "wall" and bouncing == 0: #only bounc off 1 wall at at ime
           self.velocity = self._bounce_velocity(ent,scalar=50)
