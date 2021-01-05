@@ -42,6 +42,7 @@ class Turret(pygame.sprite.Sprite):
     self.position = position
     self.radius = 100 # shoot range - circle collision detection
     self.ammo = 5
+    self.damage = 1
     self.reload_time = 0.2
     self.shoot_timestamp = 0
 
@@ -81,6 +82,8 @@ class Turret(pygame.sprite.Sprite):
 
   def _shoot(self,target):
     if self.ammo > 0:
+      target.take_damage(self.damage)
+      # print("shooting!!!")
       # self.entity_group.add_ent([self],["sound"])
       # self.game.sound.laser_sound.play()
 
@@ -100,6 +103,8 @@ class Baddie(pygame.sprite.Sprite):
 
     self.speed = speed # pixels per second - decimal important!
     self.velocity = (0,0)
+
+    self.damage = 1
 
   @property
   def position(self):
@@ -165,8 +170,11 @@ class Baddie(pygame.sprite.Sprite):
   def _new_position_from_velocity(self,step_time):
     return new_position(self.position,self.velocity,step_time)
 
-  def reduce_health(self,damage):
+  def take_damage(self,damage):
     self.health -= damage
+  
+  def _do_damage(self,target,damage):
+    target.health -= damage
   
   def _check_dead(self):
     if self.health <= 0:
@@ -190,6 +198,7 @@ class Core(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = position
 
+    self.health = 20
 class Wall(pygame.sprite.Sprite):
   def __init__(self,position):
     pygame.sprite.Sprite.__init__(self)
