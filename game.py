@@ -16,12 +16,15 @@ class GUI:
   def start_display(self,winsize=[640, 480]):
     self.screen = self.display.set_mode(winsize)
 
-class Sound:
-  """CHANGE: import list of sound files"""
-  def __init__(self):
-    self.mixer = pygame.mixer
-    self.mixer.init()
-    self.laser_sound = pygame.mixer.Sound("pew.ogg")
+# class Sound:
+#   """CHANGE: import list of sound files"""
+#   def __init__(self):
+#     self.mixer = pygame.mixer
+#     self.mixer.init()
+#     self.list = [pygame.mixer.Sound("pew.ogg")]
+
+#   def play(self):
+
 
 class Event:
   def __init__(self):
@@ -117,7 +120,7 @@ def main():
   ]
 
   gui = GUI()
-  sound = Sound()
+  # sound = Sound()
   event = Event()
 
   facdustry = Game(ent_init_list,gui,event, sound=None)
