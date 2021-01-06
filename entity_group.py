@@ -3,7 +3,8 @@ import pygame
 class EntityGroup:
   """all imported entities are being drawn"""
   def __init__(self):
-    
+    self.state = None
+
     self.dict = {}
 
     default_groups = ["all","draw","remove","sound","game_over"]
