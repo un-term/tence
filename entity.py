@@ -200,7 +200,7 @@ class Core(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.center = position
 
-    self.health = 20
+    self.health = 40.0
 
   def update(self,step_time,total_time):
     self._check_dead()
@@ -215,6 +215,8 @@ class Core(pygame.sprite.Sprite):
   def _check_health(self):
     if self.health < 10:
       self.image.fill(RED)
+    elif self.health < 20:
+      self.image.fill(YELLOW)
 
 class Wall(pygame.sprite.Sprite):
   def __init__(self,position):
