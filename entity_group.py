@@ -2,7 +2,7 @@ import pygame
 
 class EntityGroup:
   """all imported entities are being drawn"""
-  def __init__(self):
+  def __init__(self, entity_list):
     self.state = None
 
     self.dict = {}
@@ -11,7 +11,8 @@ class EntityGroup:
     self._create_groups_from_list(default_groups)
 
     self.default_add_ent_group = ["all"]
-    # self.add_ent(entity_list)
+    
+    self.add_ent(entity_list)
 
   def add_ent(self, entity_list, group_list=["draw"]):
     #create groups

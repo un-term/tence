@@ -133,9 +133,7 @@ def main():
     Wall((150,250)),
     Wall((150,240))
   ]
-  entity_group = EntityGroup()
-  entity_group.add_ent(ent_init_list)
-
+  entity_group = EntityGroup(ent_init_list)
   state = State(entity_group)
 
   gui = GUI()
