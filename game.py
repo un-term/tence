@@ -76,7 +76,7 @@ class Game:
     self.winsize = (400,400)
 
     if gui: 
-      self.gui.start_display(winsize=[640, 480])
+      self.gui.start_display(winsize=[700, 700])
       if event:
         self.event.game=self
 
@@ -121,9 +121,11 @@ def main():
 
   ent_init_list = [
     Baddie((200,400),speed=50.0),
-    Turret((300,150)),
-    Turret((100,150)),
-    Core((200,50)),
+    Turret((250,250)),
+    Turret((450,250)),
+    Core((350,350)),
+    Turret((250,450)),
+    Turret((450,450)),
     Wall((150,280)),
     Wall((160,280)),
     Wall((170,280)),
