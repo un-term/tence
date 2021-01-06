@@ -11,7 +11,7 @@ class EntityGroup:
     self._create_groups_from_list(default_groups)
 
     self.default_add_ent_group = ["all"]
-    
+
     self.add_ent(entity_list)
 
   def add_ent(self, entity_list, group_list=["draw"]):
@@ -63,14 +63,10 @@ class EntityGroup:
       entity.entity_group = self
 
   def get_group(self,group_name):
-    group = self.dict[group_name]
-
-    if group is None:
-        raise TypeError("group does not exist")
-    # elif not group:
-    #   raise KeyError(group_name)
-    else:
-      return group
+    try:
+      return self.dict[group_name]
+    except:
+      print(group_name, " does not exist")
 
   # def __len__(self):
   #   return len(self.dict)
