@@ -18,6 +18,26 @@ class TestEntity(unittest.TestCase):
     result = len(entity_group.dict["all"].sprites())
     self.assertEqual(1, result)
 
+  def test_baddie_collision_with_other_baddie(self):
+    """baddie should continue moving when touching another baddie"""
+
+    ent_init_list = [
+      Baddie((150,150)),
+      Baddie((150,150)),
+      Turret((100,100))
+      # Core((50,50))
+    ]
+    entity_group = EntityGroup(ent_init_list)
+    state = State(entity_group)
+
+    bad1_pos = state.entity_group.get_group("baddie").sprites()[0].position
+
+    state.entity_group.get_group("all").update(step_time=1,total_time=1)
+
+    result = state.entity_group.get_group("baddie").sprites()[0].position
+
+
+    self.assertNotEqual(bad1_pos, result)
   def test_turret_shooting(self):
 
     entity_group = EntityGroup()
