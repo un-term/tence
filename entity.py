@@ -159,7 +159,9 @@ class Baddie(pygame.sprite.Sprite):
 
   def _find_nearest_core(self):
     """CHANGE - currently returns one core only"""
-    return self.entity_group.get_group("core").sprites()[0].position
+    try: return self.entity_group.get_group("core").sprites()[0].position
+    except: print("core does not exist")
+    finally: return (0.0,0.0) # if no core return origin
 
   def _calc_velocity_to_core(self,core_position):
     return calc_const_velocity(self.position, core_position, self.speed)
