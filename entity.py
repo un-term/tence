@@ -204,7 +204,7 @@ class Core(pygame.sprite.Sprite):
   def _check_dead(self):
     """CHANGE - adding entities to game_over group to avoid having to know game object"""
     if self.health < 0:
-      self.entity_group.add_ent([self],["game_over"])
+      self.entity_group.state.end_game()
       print("game over")
 
   def _check_health(self):

@@ -7,7 +7,7 @@ class EntityGroup:
 
     self.dict = {}
 
-    default_groups = ["all","draw","remove","sound","game_over"]
+    default_groups = ["all","draw","remove","sound"]
     self._create_groups_from_list(default_groups)
 
     self.default_add_ent_group = ["all"]
