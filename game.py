@@ -38,7 +38,7 @@ class Event:
 
   def _check_quit(self,event):
     if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
-      self.state.game_over = 1
+      self.state.game_over.end_game()
 
   def _check_click(self):
     mouse_buttons = pygame.mouse.get_pressed()
