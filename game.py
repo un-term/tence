@@ -47,6 +47,9 @@ class Event:
       self.game.entity_group.add_ent([Baddie(mouse_pos, speed=30)])
 
 
+  def end_game(self):
+    self.game_over = 1
+
 class Game:
   def __init__(self, ent_init_list, gui=None, event=None,sound=None):
     self.game_over = 0
