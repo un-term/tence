@@ -57,8 +57,9 @@ class Turret(pygame.sprite.Sprite):
   def update(self,step_time,total_time):
 
     # Check for targets & fire
-    if not self.reloading(total_time):
-      hit_list = self._check_for_targets(self.entity_group.get_group("baddie"))
+    if not self._reloading(total_time):
+      target_group = self.entity_group.get_group("baddie")
+      hit_list = self._check_for_targets(target_group)
       if hit_list:
         self._shoot(hit_list[0]) # shoot first baddie in list only
         self.shoot_timestamp = total_time
@@ -72,13 +73,19 @@ class Turret(pygame.sprite.Sprite):
 
   def _check_for_targets(self,target_group):
     hit_list = []
-    hit_list = pygame.sprite.spritecollide(self,target_group, False, pygame.sprite.collide_circle)
-    return hit_list
+    if target_group:
+      hit_list = pygame.sprite.spritecollide(self,target_group, False, pygame.sprite.collide_circle)
+      return hit_list
+    else:
+      return hit_list
 
   def _check_for_touching(self,target_group):
     touch_list =[]
-    touch_list = pygame.sprite.spritecollide(self,target_group, False, pygame.sprite.collide_rect)
-    return touch_list
+    if target_group:
+      touch_list = pygame.sprite.spritecollide(self,target_group, False, pygame.sprite.collide_rect)
+      return touch_list
+    else:
+      return touch_list
 
   def _shoot(self,target):
     if self.ammo > 0:
@@ -161,10 +168,10 @@ class Baddie(pygame.sprite.Sprite):
 
   def _find_nearest_core(self):
     """CHANGE - currently returns one core only"""
-    try: return self.entity_group.get_group("core").sprites()[0].position
-    except: 
-      print("core does not exist")
-      return (0.0,0.0) 
+    if self.entity_group.get_group("core") is not None:
+      return self.entity_group.get_group("core").sprites()[0].position
+    else:
+      return (0.0,0.0)       
 
   def _calc_velocity_to_core(self,core_position):
     return calc_const_velocity(self.position, core_position, self.speed)
