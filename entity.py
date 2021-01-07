@@ -95,6 +95,7 @@ class Turret(pygame.sprite.Sprite):
       return touch_list
 
   def _shoot(self,target):
+    """CHANGE: ammo"""
     if self.ammo > 0:
       target.take_damage(self.damage)
       # print("shooting!!!")
@@ -131,9 +132,9 @@ class Baddie(pygame.sprite.Sprite):
 
   def update(self,step_time,total_time):
     """calls internal methods"""
-    colsn_list = self._check_for_collisions(["all"])
+    colsn_list = self._check_for_collision(["all"]) # all may need changing
     colsn_list.remove(self)
-    bouncing = 0
+    # bouncing = 0
     if colsn_list:
       for ent in colsn_list:
         ent.collision(self)
@@ -151,7 +152,7 @@ class Baddie(pygame.sprite.Sprite):
   #     tmp_group.remove(self)
   #     return pygame.sprite.spritecollide(self,tmp_group,False, pygame.sprite.collide_rect)
 
-  def _check_for_collisions(self,group_list):
+  def _check_for_collision(self,group_list):
     """list of collided sprites for group"""
     cld_list = []
     for group in group_list:
