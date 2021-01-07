@@ -19,10 +19,7 @@ class TestEntityGroup(unittest.TestCase):
       Wall((170,280)),
       Wall((180,280))
     ]
-  
-    entity_group = EntityGroup()
-
-    entity_group.add_ent(ent_init_list)
+    entity_group = EntityGroup(ent_init_list)
 
     entity_group.add_ent([Baddie((200,100),speed=30.0)])
 
@@ -39,8 +36,7 @@ class TestEntityGroup(unittest.TestCase):
       Wall((170,280))
     ]
   
-    entity_group = EntityGroup()
-    entity_group.add_ent(ent_init_list)
+    entity_group = EntityGroup(ent_init_list)
     entity_group.add_ent([Baddie((200,100),speed=30.0)], ["remove"])
 
     result = len(entity_group.dict["remove"].sprites())
@@ -56,7 +52,7 @@ class TestEntityGroup(unittest.TestCase):
       Wall((170,280))
     ]
   
-    entity_group = EntityGroup()
+    entity_group = EntityGroup([])
     entity_group.add_ent(ent_init_list,["remove"])
     result = len(entity_group.dict["remove"].sprites())
 
@@ -71,8 +67,7 @@ class TestEntityGroup(unittest.TestCase):
       Turret((100,150))
     ]
 
-    entity_group = EntityGroup()
-    entity_group.add_ent(ent_init_list)   
+    entity_group = EntityGroup(ent_init_list)
 
     result = len(entity_group.get_group("all"))
     self.assertEqual(2, result)
@@ -82,7 +77,7 @@ class TestEntityGroup(unittest.TestCase):
 
     b = Baddie((200,400))
 
-    entity_group = EntityGroup()
+    entity_group = EntityGroup([])
     entity_group.add_ent([b])   
 
     entity_group.add_ent([b])
