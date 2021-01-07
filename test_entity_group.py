@@ -78,6 +78,20 @@ class TestEntityGroup(unittest.TestCase):
     result = len(state.entity_group.get_group("all"))
     self.assertEqual(2, result)
 
+  def test_dict_missing_group_get(self):
+    """group missing - test response"""
+    ent_init_list = [
+      Baddie((200,400),speed=30.0),
+      Turret((100,150))
+    ]
+
+    entity_group = EntityGroup(ent_init_list)
+    state = State(entity_group)
+
+
+    result = entity_group.get_group("core")
+    self.assertEqual(None, result)
+
   def test_adding_duplicate(self):
     """duplicates should not be added"""
 
