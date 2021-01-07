@@ -22,16 +22,17 @@ class TestEntity(unittest.TestCase):
     """baddie should continue moving when touching another baddie"""
 
     ent_init_list = [
+      Baddie((148,148)), #overlapping but not exactly
       Baddie((150,150)),
-      Baddie((150,150)),
-      Turret((100,100))
-      # Core((50,50))
+      Turret((100,100)),
+      Core((50,50))
     ]
     entity_group = EntityGroup(ent_init_list)
     state = State(entity_group)
 
     bad1_pos = state.entity_group.get_group("baddie").sprites()[0].position
 
+    state.entity_group.get_group("all").update(step_time=1,total_time=1)
     state.entity_group.get_group("all").update(step_time=1,total_time=1)
 
     result = state.entity_group.get_group("baddie").sprites()[0].position
