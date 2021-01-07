@@ -67,7 +67,7 @@ class Turret(pygame.sprite.Sprite):
         # line[0].draw(self.game.screen)
         self.entity_group.add_ent([laser],["draw","remove"])
 
-  def reloading(self,total_time):
+  def _reloading(self,total_time):
     return (total_time - self.shoot_timestamp <= self.reload_time)
 
   def _check_for_targets(self,target_group):
