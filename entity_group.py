@@ -63,10 +63,19 @@ class EntityGroup:
       entity.entity_group = self
 
   def get_group(self,group_name):
-    try:
+    if not group_name in self.dict:
+      # raise KeyError("The group ", group_name, " does not exist")
+      print("The group '", group_name, "' does not exist")
+      return None
+    else:
       return self.dict[group_name]
-    except:
-      print(group_name, " does not exist")
+    # try: 
+    #   group_name in self.dict
+    # except: 
+    # if group_name in self.dict:
+    #   return self.dict[group_name]
+    # else:
+    #   print("Cannot get", group_name, " does not exist")
 
   # def __len__(self):
   #   return len(self.dict)
