@@ -31,6 +31,9 @@ class LineSprite(pygame.sprite.Sprite):
   def update(self,step_time,total_time):
     pass
 
+  def collision(self,ent):
+    pass
+
 class Turret(pygame.sprite.Sprite):
   # Constructor
   def __init__(self,position):
@@ -67,6 +70,10 @@ class Turret(pygame.sprite.Sprite):
         laser = LineSprite(RED, self.position, hit_list[0].position)
         # line[0].draw(self.game.screen)
         self.entity_group.add_ent([laser],["draw","remove"])
+
+  def collision(self,ent):
+    if ent.type == "baddie":
+      ent.take_damage(ent.health)
 
   def _reloading(self,total_time):
     return (total_time - self.shoot_timestamp <= self.reload_time)
@@ -129,18 +136,8 @@ class Baddie(pygame.sprite.Sprite):
     bouncing = 0
     if colsn_list:
       for ent in colsn_list:
-        if ent.type == "core": 
-          self._do_damage(ent,self.damage)
-          self.health = 0
-        # print("core colliding")
-        elif ent.type == "turret": self.health = 0
-        elif ent.type == "wall" and bouncing == 0: #only bounc off 1 wall at at ime
-          self.velocity = self._bounce_velocity(ent,scalar=50)
-          bouncing = 1
-        elif ent.type == "baddie": # continue moving
-          core_position = self._find_nearest_core()
-          self.velocity = self._calc_velocity_to_core(core_position)
-    else:
+        ent.collision(self)
+    else: # does not collide
       core_position = self._find_nearest_core()
       self.velocity = self._calc_velocity_to_core(core_position)
 
@@ -160,11 +157,11 @@ class Baddie(pygame.sprite.Sprite):
     for group in group_list:
       cld_list += pygame.sprite.spritecollide(self,self.entity_group.get_group(group),False, pygame.sprite.collide_rect)
     return cld_list
-  
-  def _bounce_velocity(self,obj_hit,scalar=1):
-    """bounce back in the opposite direction of nearest wall block"""
-    dir = calc_const_velocity(self.position, obj_hit.position, speed=1) # speed not needed
-    return vector_scalar_mult(dir,scalar*(-1.0))
+
+  def collision(self, entity):
+    """continues moving baddie when colliding with other baddie"""
+    core_position = self._find_nearest_core()
+    self.velocity = self._calc_velocity_to_core(core_position)
 
   def _find_nearest_core(self):
     """CHANGE - currently returns one core only"""
@@ -213,6 +210,13 @@ class Core(pygame.sprite.Sprite):
     self._check_dead()
     self._check_health()
 
+  def collision(self, ent):
+    if ent.type == "baddie":
+      ent._do_damage(self,ent.damage)
+      ent.health = 0
+    else:
+      pass
+
   def _check_dead(self):
     """CHANGE - adding entities to game_over group to avoid having to know game object"""
     if self.health < 0:
@@ -240,3 +244,16 @@ class Wall(pygame.sprite.Sprite):
 
   def update(self,step_time,total_time):
     pass
+
+  def collision(self,ent):
+    if ent.type == "baddie":
+      ent.velocity = self._bounce_velocity(ent,scalar=50)
+    else:
+      pass
+
+  def _bounce_velocity(self,ent,scalar=1):
+    """bounce back in the opposite direction of nearest wall block"""
+    dir = calc_const_velocity(ent.position, self.position, speed=1) # speed not needed
+    return vector_scalar_mult(dir,scalar*(-1.0))
+
+      
