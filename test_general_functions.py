@@ -86,6 +86,13 @@ class TestGeneralFunctions(unittest.TestCase):
     result = sort_vector_small_big((20,4),(20,1),axis="y")
     self.assertLess(result[0][1],result[1][1])
 
+  def test_gen_coords_from_range(self):
+    start=(10,29)
+    end=(10,10)
+    points = gen_coords_from_range(start,end,axis="y",spacing=3)
+    result = len(points)
+    self.assertEqual(6+1,result)
+
  
 if __name__ == '__main__':
   unittest.main()
