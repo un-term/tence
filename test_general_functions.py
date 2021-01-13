@@ -81,6 +81,11 @@ class TestGeneralFunctions(unittest.TestCase):
     result = new_position(position=(125,275),velocity=(-3.2,-9.5),time=2)
     result = round_vector(result,1)
     self.assertEqual((118.6,256.0), result)
+
+  def test_sort_vector_small_big(self):
+    result = sort_vector_small_big((20,4),(20,1),axis="y")
+    self.assertLess(result[0][1],result[1][1])
+
  
 if __name__ == '__main__':
   unittest.main()

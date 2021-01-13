@@ -108,3 +108,23 @@ def grid_snap_vector(grid,V):
 def coord_sys_map_translation(offset, V_g):
   """mapping global (g) to local (l)"""
   return vector_subtract(V_g,offset)
+
+def sort_vector_small_big(V1,V2,axis):
+  """return smaller and then bigger vector along specified axis"""
+  if axis == "x" and V1[1]==V2[1]:
+    if V1[0] < V2[0]:
+      return V1,V2
+    elif V1[0] > V2[0]:
+      return V2,V1
+    elif V1[0] == V2[0]:
+      return V1,V2
+  elif axis == "y" and V1[0]==V2[0]:
+    if V1[1] < V2[1]:
+      return V1,V2
+    elif V1[1] > V2[1]:
+      return V2,V1
+    elif V1[1] == V2[1]:
+      return V1,V2
+  else:
+    raise Exception("Start and End coordinates are not on the required axis")
+
