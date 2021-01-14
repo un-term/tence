@@ -120,23 +120,30 @@ class Game:
 def main():
 
   ent_init_list = [
-    Baddie((200,400),speed=50.0),
+    # Baddie((200,400),speed=50.0),
     Turret((250,250)),
     Turret((450,250)),
     Core((350,350)),
     Turret((250,450)),
-    Turret((450,450)),
-    Wall((150,280)),
-    Wall((160,280)),
-    Wall((170,280)),
-    Wall((180,280)),
-    Wall((150,270)),
-    Wall((150,260)),
-    Wall((150,250)),
-    Wall((150,240))
+    Turret((450,450))
+    # Wall((150,280)),
+    # Wall((160,280)),
+    # Wall((170,280)),
+    # Wall((180,280)),
+    # Wall((150,270)),
+    # Wall((150,260)),
+    # Wall((150,250)),
+    # Wall((150,240))
   ]
   entity_group = EntityGroup(ent_init_list)
   state = State(entity_group)
+
+  wall = Wall((0,0))
+  point_list = gen_coords_from_range((150,550),(350,550),axis="x",spacing=wall.size[0])
+  for point in point_list:
+    entity_group.add_ent([Wall(point)])
+
+  # entity_group.add_ent(wall_list)
 
   gui = GUI()
   # sound = Sound()
