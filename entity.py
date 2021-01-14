@@ -43,6 +43,7 @@ class Turret(pygame.sprite.Sprite):
     self.type = "turret"
  
     self.position = position
+    self.size = (30,30)
     self.radius = 100 # shoot range - circle collision detection
     self.ammo = 5
     self.damage = 1
@@ -50,7 +51,7 @@ class Turret(pygame.sprite.Sprite):
     self.shoot_timestamp = 0
 
     # body
-    self.image = pygame.Surface((30,30))
+    self.image = pygame.Surface(self.size)
     self.image.fill(DEEPSKYBLUE)
     # Fetch the rectangle object that has the dimensions of the image
     # Update the position of this object by setting the values of rect.x and rect.y
@@ -109,8 +110,8 @@ class Baddie(pygame.sprite.Sprite):
     self.type = "baddie"
 
     self.health = 2
-
-    self.image = pygame.Surface((10,10))
+    self.size = (10,10)
+    self.image = pygame.Surface(self.size)
     self.image.fill(RED)
     self.radius = 5 # circle collision detection
     self.rect = self.image.get_rect()
@@ -198,9 +199,10 @@ class Core(pygame.sprite.Sprite):
     self.type = "core"
  
     self.position = position
+    self.size = (50,50)
     self.radius = 25 # shoot range - circle collision detection
 
-    self.image = pygame.Surface((50,50))
+    self.image = pygame.Surface(self.size)
     self.image.fill(GREEN)
     self.rect = self.image.get_rect()
     self.rect.center = position
@@ -237,8 +239,9 @@ class Wall(pygame.sprite.Sprite):
     self.type = "wall"
 
     self.position = position
+    self.size = (10,10)
 
-    self.image = pygame.Surface((10,10))
+    self.image = pygame.Surface(self.size)
     self.image.fill(YELLOW)
     self.rect = self.image.get_rect()
     self.rect.center = position
