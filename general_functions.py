@@ -1,5 +1,4 @@
 import math
-import unittest
 
 def round_sig(x, sig=5):
   return round(x, sig - int(math.floor(math.log10(abs(x))))-1)
@@ -109,42 +108,6 @@ def coord_sys_map_translation(offset, V_g):
   """mapping global (g) to local (l)"""
   return vector_subtract(V_g,offset)
 
-# def gen_coords_from_range(start,end,axis,spacing):
-
-#   if axis == "x": 
-#     if start[1]==end[1]:
-#       i = 0
-#     else: raise Exception("Start and End coordinates are not on the required axis")
-#   elif axis == "y": 
-#     if start[0]==end[0]:
-#       i = 1
-#     else: raise Exception("Start and End coordinates are not on the required axis")
-#   else:
-#     raise Exception("Incorrect axis specified")
-
-#   Dta = abs(start[i]-end[i])
-#   nb = math.floor(Dta/spacing)
-
-#   for stp+1 in range(nb):
-
-
-#   point_list = []
-
-#   x = start[0]
-#   for stp+1 < nb:
-
-#     point_list.append((,0))
-
-
-
-#   if axis == "x":
-#     if start[1]==end[1]:
-#       y_const = start[1]
-#       for i in range(start[0],end[0],wall_size[0]):
-#         point_list.append((i,y_const))
-#     else:
-#       raise Exception("Start and End coordinates are not on the required axis")
-
 def sort_vector_small_big(V1,V2,axis):
   """return smaller and then bigger vector along specified axis"""
   if axis == "x" and V1[1]==V2[1]:
@@ -163,7 +126,6 @@ def sort_vector_small_big(V1,V2,axis):
       return V1,V2
   else:
     raise Exception("Start and End coordinates are not on the required axis")
-
 
 def gen_coords_from_range(start,end,axis,spacing):
   """note: points created from and on start. 
