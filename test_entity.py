@@ -10,80 +10,80 @@ from game import State
 
 class TestEntity(unittest.TestCase):
 
-  def test_line_sprite(self):
+    def test_line_sprite(self):
 
-    entity_group = EntityGroup([LineSprite(RED,(0,0),(100,100))])
-    state = State(entity_group)
+        entity_group = EntityGroup([LineSprite(RED,(0,0),(100,100))])
+        state = State(entity_group)
 
-    result = len(entity_group.dict["all"].sprites())
-    self.assertEqual(1, result)
+        result = len(entity_group.dict["all"].sprites())
+        self.assertEqual(1, result)
 
-  def test_baddie_collision_with_other_baddie(self):
-    """baddie should continue moving when touching another baddie"""
+    def test_baddie_collision_with_other_baddie(self):
+        """baddie should continue moving when touching another baddie"""
 
-    ent_init_list = [
-      Baddie((148,148)), #overlapping but not exactly
-      Baddie((150,150)),
-      Turret((100,100)),
-      Core((50,50))
-    ]
-    entity_group = EntityGroup(ent_init_list)
-    state = State(entity_group)
+        ent_init_list = [
+            Baddie((148,148)), #overlapping but not exactly
+            Baddie((150,150)),
+            Turret((100,100)),
+            Core((50,50))
+        ]
+        entity_group = EntityGroup(ent_init_list)
+        state = State(entity_group)
 
-    bad1_pos = state.entity_group.get_group("baddie").sprites()[0].position
+        bad1_pos = state.entity_group.get_group("baddie").sprites()[0].position
 
-    state.entity_group.get_group("all").update(step_time=1,total_time=1)
-    state.entity_group.get_group("all").update(step_time=1,total_time=1)
+        state.entity_group.get_group("all").update(step_time=1,total_time=1)
+        state.entity_group.get_group("all").update(step_time=1,total_time=1)
 
-    result = state.entity_group.get_group("baddie").sprites()[0].position
-
-
-    self.assertNotEqual(bad1_pos, result)
+        result = state.entity_group.get_group("baddie").sprites()[0].position
 
 
-  def test_turret_shooting(self):
-    """CHANGE: assumes baddie is within range of turret"""
+        self.assertNotEqual(bad1_pos, result)
 
-    ent_init_list = [
-      Baddie((150,150),speed=0.01),
-      Turret((100,100)),
-      Core((50,50))
-    ]
-    entity_group = EntityGroup(ent_init_list)
-    state = State(entity_group)
 
-    health = state.entity_group.dict["baddie"].sprites()[0].health #[0] first and only in list
-    shoot_damage = state.entity_group.dict["turret"].sprites()[0].damage
+    def test_turret_shooting(self):
+        """CHANGE: assumes baddie is within range of turret"""
 
-    state.entity_group.get_group("all").update(step_time=1,total_time=1)
-    state.entity_group.get_group("all").update(step_time=1,total_time=2)
+        ent_init_list = [
+            Baddie((150,150),speed=0.01),
+            Turret((100,100)),
+            Core((50,50))
+        ]
+        entity_group = EntityGroup(ent_init_list)
+        state = State(entity_group)
 
-    result = state.entity_group.dict["baddie"].sprites()[0].health
+        health = state.entity_group.dict["baddie"].sprites()[0].health #[0] first and only in list
+        shoot_damage = state.entity_group.dict["turret"].sprites()[0].damage
 
-    health = health-shoot_damage*2
+        state.entity_group.get_group("all").update(step_time=1,total_time=1)
+        state.entity_group.get_group("all").update(step_time=1,total_time=2)
 
-    self.assertEqual(health, result)
+        result = state.entity_group.dict["baddie"].sprites()[0].health
 
-  def test_core_damage(self):
+        health = health-shoot_damage*2
 
-    ent_init_list = [
-      Baddie((100,100),speed=10),
-      Core((50,50))
-    ]
-    entity_group = EntityGroup(ent_init_list)
-    state = State(entity_group)
+        self.assertEqual(health, result)
 
-    core_health = state.entity_group.dict["core"].sprites()[0].health
-    baddie_damage = state.entity_group.dict["baddie"].sprites()[0].damage
+    def test_core_damage(self):
 
-    # baddies do collision detection before moving
-    state.entity_group.get_group("all").update(step_time=3,total_time=3)
-    state.entity_group.get_group("all").update(step_time=3,total_time=6)
+        ent_init_list = [
+            Baddie((100,100),speed=10),
+            Core((50,50))
+        ]
+        entity_group = EntityGroup(ent_init_list)
+        state = State(entity_group)
 
-    result = state.entity_group.dict["core"].sprites()[0].health
-    core_health -= baddie_damage
+        core_health = state.entity_group.dict["core"].sprites()[0].health
+        baddie_damage = state.entity_group.dict["baddie"].sprites()[0].damage
 
-    self.assertEqual(core_health, result)
+        # baddies do collision detection before moving
+        state.entity_group.get_group("all").update(step_time=3,total_time=3)
+        state.entity_group.get_group("all").update(step_time=3,total_time=6)
+
+        result = state.entity_group.dict["core"].sprites()[0].health
+        core_health -= baddie_damage
+
+        self.assertEqual(core_health, result)
 
 if __name__ == '__main__':
   unittest.main()
