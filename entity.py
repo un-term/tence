@@ -132,6 +132,7 @@ class Baddie(pygame.sprite.Sprite):
 
         self.speed = speed # pixels per second - decimal important!
         self.velocity = (0,0)
+        self.bounce_timestamp = 0
 
         self.damage = 1
 
@@ -152,6 +153,8 @@ class Baddie(pygame.sprite.Sprite):
         if colsn_list:
             for ent in colsn_list:
                 ent.collision(self)
+        elif self.check_bounce(self.entity_group.state.total_time, bounce_limit=0.1):
+            pass # keep bounce velocity
         else: # does not collide
             core_position = self._find_nearest_core()
             self.velocity = self._calc_velocity_to_core(core_position)
@@ -201,6 +204,9 @@ class Baddie(pygame.sprite.Sprite):
         if self.health <= 0:
             # self.game.entity_group["remove"].add(self)
             self.entity_group.add_ent([self],["remove"])
+    
+    def check_bounce(self,total_time, bounce_limit=0.5):
+      return (total_time - self.bounce_timestamp <= bounce_limit)
   
 
 class Core(pygame.sprite.Sprite):
@@ -265,6 +271,7 @@ class Wall(pygame.sprite.Sprite):
     def collision(self,ent):
         if ent.type == "baddie":
             ent.velocity = self._bounce_velocity(ent,scalar=50)
+            ent.bounce_timestamp = self.entity_group.state.total_time
         else:
             pass
 
