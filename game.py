@@ -87,7 +87,7 @@ class Game:
 
           # update all sprites
           #-------------------------------------------------------------
-            self.state.entity_group.get_group("all").update(self.state.step_time,self.state.total_time)
+            self.state.entity_group.get_group("all").update()
 
             if self.gui:
                 self.gui.display.update()

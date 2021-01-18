@@ -32,8 +32,12 @@ class TestEntity(unittest.TestCase):
 
         bad1_pos = state.entity_group.get_group("baddie").sprites()[0].position
 
-        state.entity_group.get_group("all").update(step_time=1,total_time=1)
-        state.entity_group.get_group("all").update(step_time=1,total_time=1)
+        state.step_time = 1
+        state.total_time = 1
+        state.entity_group.get_group("all").update()
+        state.step_time = 1
+        state.total_time = 2
+        state.entity_group.get_group("all").update()
 
         result = state.entity_group.get_group("baddie").sprites()[0].position
 
@@ -55,8 +59,12 @@ class TestEntity(unittest.TestCase):
         health = state.entity_group.dict["baddie"].sprites()[0].health #[0] first and only in list
         shoot_damage = state.entity_group.dict["turret"].sprites()[0].damage
 
-        state.entity_group.get_group("all").update(step_time=1,total_time=1)
-        state.entity_group.get_group("all").update(step_time=1,total_time=2)
+        state.step_time = 1
+        state.total_time = 1
+        state.entity_group.get_group("all").update()
+        state.step_time = 1
+        state.total_time = 2
+        state.entity_group.get_group("all").update()
 
         result = state.entity_group.dict["baddie"].sprites()[0].health
 
@@ -77,8 +85,12 @@ class TestEntity(unittest.TestCase):
         baddie_damage = state.entity_group.dict["baddie"].sprites()[0].damage
 
         # baddies do collision detection before moving
-        state.entity_group.get_group("all").update(step_time=3,total_time=3)
-        state.entity_group.get_group("all").update(step_time=3,total_time=6)
+        state.step_time = 3
+        state.total_time = 3
+        state.entity_group.get_group("all").update()
+        state.step_time = 3
+        state.total_time = 6
+        state.entity_group.get_group("all").update()
 
         result = state.entity_group.dict["core"].sprites()[0].health
         core_health -= baddie_damage

@@ -28,7 +28,7 @@ class LineSprite(pygame.sprite.Sprite):
         pygame.draw.line(self.image,self.colour,local_start,local_end,3)
         # line drawn on surface local coordinate system
 
-    def update(self,step_time,total_time):
+    def update(self):
         pass
 
     def collision(self,ent):
@@ -58,14 +58,13 @@ class Turret(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = position
 
-    def update(self,step_time,total_time):
+    def update(self):
         # Check for targets & fire
-        if not self._reloading(total_time):
+        if not self._reloading(self.entity_group.state.total_time):
             target_group = self.entity_group.get_group("baddie")
             hit_list = self._check_for_targets(target_group)
             if hit_list:
-                self._shoot(hit_list[0]) # shoot first baddie in list only
-                self.shoot_timestamp = total_time
+                self._shoot(hit_list[0],self.entity_group.state.total_time) # shoot first baddie in list only
                 # self.line=Line(RED, self.position, hit_list[0].position) # laser
                 laser = LineSprite(RED, self.position, hit_list[0].position)
                 # line[0].draw(self.game.screen)
@@ -94,10 +93,12 @@ class Turret(pygame.sprite.Sprite):
         else:
             return touch_list
 
-    def _shoot(self,target):
+    def _shoot(self,target,total_time):
         """CHANGE: ammo"""
         if self.ammo > 0:
             target.take_damage(self.damage)
+            self.shoot_timestamp = total_time
+
         # print("shooting!!!")
         # self.entity_group.add_ent([self],["sound"])
         # self.game.sound.laser_sound.play()
@@ -130,7 +131,7 @@ class Baddie(pygame.sprite.Sprite):
         self._position = value
         self.rect.center = value
 
-    def update(self,step_time,total_time):
+    def update(self):
         """calls internal methods"""
         colsn_list = self._check_for_collision(["all"]) # all may need changing
         colsn_list.remove(self)
@@ -142,7 +143,7 @@ class Baddie(pygame.sprite.Sprite):
             core_position = self._find_nearest_core()
             self.velocity = self._calc_velocity_to_core(core_position)
 
-        self.position = self._new_position_from_velocity(step_time)
+        self.position = self._new_position_from_velocity(self.entity_group.state.step_time)
 
         self._check_dead()
 
@@ -208,7 +209,7 @@ class Core(pygame.sprite.Sprite):
 
         self.health = 40.0
 
-    def update(self,step_time,total_time):
+    def update(self):
         self._check_dead()
         self._check_health()
 
@@ -245,7 +246,7 @@ class Wall(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = position
 
-    def update(self,step_time,total_time):
+    def update(self):
         pass
 
     def collision(self,ent):
