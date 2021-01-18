@@ -34,15 +34,14 @@ class Event:
     def check_event(self):
         for event in self.event.get():
             self._check_quit(event)
-            self._check_click() # CHANGE - not dependent on pygame events
+            self._check_click(event) # CHANGE - not dependent on pygame events
 
     def _check_quit(self,event):
         if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
             self.state.game_over.end_game()
 
-    def _check_click(self):
-        mouse_buttons = pygame.mouse.get_pressed()
-        if mouse_buttons[0]:
+    def _check_click(self,event):
+        if event.type == pygame.MOUSEBUTTONUP:
             mouse_pos = pygame.mouse.get_pos()
             self.state.entity_group.add_ent([Baddie(mouse_pos, speed=30)])
 
