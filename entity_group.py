@@ -64,8 +64,6 @@ class EntityGroup:
 
     def get_group(self,group_name):
         if not group_name in self.dict:
-            # raise KeyError("The group ", group_name, " does not exist")
-            print("The group '", group_name, "' does not exist")
             return None
         else:
             return self.dict[group_name]
