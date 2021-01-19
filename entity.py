@@ -149,8 +149,15 @@ class Baddie(pygame.sprite.Sprite):
         """calls internal methods"""
         colsn_list = self._check_for_collision(["all"]) # all may need changing
         colsn_list.remove(self)
-        # bouncing = 0
+        
+        #managing multiple collisions
         if colsn_list:
+            if check_for_type(colsn_list,"baddie") and check_for_type(colsn_list,"wall"):
+                colsn_list = remove_type_from_list(colsn_list,"baddie")
+            if check_for_type(colsn_list,"baddie"): # CHANGE: if baddies are to collide change
+                colsn_list = remove_type_from_list(colsn_list,"baddie")
+        
+        if colsn_list:    
             for ent in colsn_list:
                 ent.collision(self)
         elif self.check_bounce(self.entity_group.state.total_time, bounce_limit=0.1):
@@ -178,8 +185,7 @@ class Baddie(pygame.sprite.Sprite):
 
     def collision(self, entity):
         """continues moving baddie when colliding with other baddie"""
-        core_position = self._find_nearest_core()
-        self.velocity = self._calc_velocity_to_core(core_position)
+        pass
 
     def _find_nearest_core(self):
         """CHANGE - currently returns one core only"""
