@@ -294,6 +294,9 @@ class Wall(pygame.sprite.Sprite):
             ent.bounce_timestamp = self.entity_group.state.total_time
         else:
             pass
+    
+    def get_edge_midpoints(self):
+        return [self.rect.midtop,self.rect.midright,self.rect.midbottom,self.rect.midleft]
 
     def _bounce_velocity(self,ent,scalar=1):
         """bounce back in the opposite direction of nearest wall block"""
