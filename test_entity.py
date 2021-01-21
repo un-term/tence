@@ -7,6 +7,7 @@ from entity import *
 from constants import *
 from entity_group import EntityGroup
 from game import State
+from general_functions import *
 
 class TestEntity(unittest.TestCase):
 
@@ -117,6 +118,18 @@ class TestEntity(unittest.TestCase):
         core_health -= baddie_damage
 
         self.assertEqual(core_health, result)
+
+    def test_get_rect_edge_axis(self):
+
+        wall = Wall((20,20))
+        baddie = Baddie((22,20))
+
+        close_edge_midpoint = find_closest_vector(baddie.position,wall.get_edge_midpoints())
+
+        result = get_rect_edge_axis(wall.rect,close_edge_midpoint)
+
+        self.assertEqual("y", result)
+
 
 if __name__ == '__main__':
   unittest.main()

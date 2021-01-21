@@ -18,6 +18,20 @@ def remove_type_from_list(ent_list, ent_type):
             ent_list.remove(ent)
     return ent_list
 
+def get_rect_edge_axis(rect,midpoint):
+    """CHANGE: brittle if rect is rotated"""
+    if rect.midtop == midpoint:
+        return "x"
+    elif rect.midbottom == midpoint:
+        return "x"
+    if rect.midleft == midpoint:
+        return "y"
+    elif rect.midright == midpoint:
+        return "y"
+    else:
+        raise Exception("Point not found on rect")
+    
+
 class LineSprite(pygame.sprite.Sprite):
     def __init__(self,colour, start, end):
         # def __init__(self):
