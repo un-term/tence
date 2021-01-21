@@ -93,6 +93,12 @@ class TestGeneralFunctions(unittest.TestCase):
         result = len(points)
         self.assertEqual(6+1,result)
 
+    def test_find_closest_vector(self):
+        vectors = [(1,1),(-2,3),(4,4),(10,20)]
+        ref_vector = (-3.4,5)
+        result = find_closest_vector(ref_vector,vectors)
+        self.assertEqual(vectors[1],result)
+
  
 if __name__ == '__main__':
     unittest.main()

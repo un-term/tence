@@ -144,3 +144,12 @@ def gen_coords_from_range(start,end,axis,spacing):
         raise Exception("Start and End coordinates are not on the required axis")
 
     return point_list
+
+def find_closest_vector(ref_vector,list_of_vectors):
+        closest_vector = list_of_vectors[0]
+        for vector in list_of_vectors[1:]:
+            if magnitude(vector_subtract(ref_vector,vector)) < magnitude(vector_subtract(ref_vector,closest_vector)):
+                closest_vector = vector
+            else:
+                pass
+        return closest_vector
