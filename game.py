@@ -138,7 +138,7 @@ def main():
     state = State(entity_group)
 
     wall = Wall((0,0))
-    point_list = gen_coords_from_range((150,550),(350,550),axis="x",spacing=wall.size[0])
+    point_list = gen_coords_from_range((150,550),(320,550),axis="x",spacing=wall.size[0])
     for point in point_list:
         entity_group.add_ent([Wall(point)])
 
