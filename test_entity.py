@@ -130,6 +130,19 @@ class TestEntity(unittest.TestCase):
 
         self.assertEqual("y", result)
 
+    def test_find_closest_entity(self):
+        
+        ent_list = [
+            Wall((150,150)),
+            Wall((160,150)),
+        ]
+        baddie = Baddie((156,154))
+
+        result = find_closest_entity(baddie,ent_list)
+
+        self.assertEqual(ent_list[1], result)
+
+
 
 if __name__ == '__main__':
   unittest.main()

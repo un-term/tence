@@ -31,6 +31,14 @@ def get_rect_edge_axis(rect,midpoint):
     else:
         raise Exception("Point not found on rect")
     
+def find_closest_entity(ref_entity,entity_list):
+    closest_entity = entity_list[0]
+    for entity in entity_list[1:]:
+        if magnitude(vector_subtract(ref_entity.position,entity.position)) < magnitude(vector_subtract(ref_entity.position,closest_entity.position)):
+            closest_entity = entity
+        else:
+            pass
+    return closest_entity
 
 class LineSprite(pygame.sprite.Sprite):
     def __init__(self,colour, start, end):
