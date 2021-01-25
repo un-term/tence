@@ -67,6 +67,18 @@ class EntityGroup:
             return None
         else:
             return self.dict[group_name]
+
+    def find_overlap(self,group1,group2):
+        overlap = []
+        if self.get_group(group1) and self.get_group(group2):
+            for entity_gp1 in self.get_group(group1):
+                for entity_gp2 in self.get_group(group2):
+                    if entity_gp1 == entity_gp2:
+                        overlap.append(entity_gp1)
+            return overlap
+        else:
+            return overlap
+                    
     # try: 
     #   group_name in self.dict
     # except: 

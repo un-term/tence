@@ -107,6 +107,26 @@ class TestEntityGroup(unittest.TestCase):
         result = len(state.entity_group.get_group("all"))
         self.assertEqual(1, result)
 
+    def test_finding_overlap(self):
+
+        b1 = Baddie((200,400))
+        b2 = Baddie((220,420))
+        c = Core((100,100))
+        t = Turret((150,150))
+
+
+        entity_group = EntityGroup([])
+        state = State(entity_group)
+
+        state.entity_group.add_ent([b1,b2,c,t])
+        state.entity_group.add_ent([b1,c],["collision"])
+        overlap = state.entity_group.find_overlap("all","collision")
+
+        result = len(overlap)
+
+        self.assertEqual(2, result)
+
+
 if __name__ == '__main__':
     unittest.main()
 
