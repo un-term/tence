@@ -169,22 +169,23 @@ class Baddie(pygame.sprite.Sprite):
 
     def update(self):
         """calls internal methods"""
-        colsn_list = self._check_for_collision(["all"]) # all may need changing
-        colsn_list.remove(self)
-        
-        #managing multiple collisions
-        if colsn_list:
-            if check_for_type(colsn_list,"baddie") and check_for_type(colsn_list,"wall"):
-                colsn_list = remove_type_from_list(colsn_list,"baddie")
-            if check_for_type(colsn_list,"baddie"): # CHANGE: if baddies are to collide change
-                colsn_list = remove_type_from_list(colsn_list,"baddie")
-        
-        if colsn_list:    
-            for ent in colsn_list:
-                ent.collision(self)
-        elif self.check_bounce(self.entity_group.state.total_time, bounce_limit=0.1):
+
+        self.entity_group.get_group("collision").empty()
+        self.entity_group.add_ent(self._check_for_collision(["all"]),["collision"])
+
+        core_list = self.entity_group.find_overlap("core","collision")
+        turret_list = self.entity_group.find_overlap("turret","collision")
+        wall_list = self.entity_group.find_overlap("wall","collision")
+        if core_list:
+            core_list[0].collision(self)
+        elif turret_list:
+            turret_list[0].collision(self)
+        elif self.check_bounce(self.entity_group.state.total_time, bounce_limit=0.15):
             pass # keep bounce velocity
-        else: # does not collide
+        elif wall_list:
+            wall = find_closest_entity(self,wall_list) # bounce off closest
+            wall.collision(self)
+        else:
             core_position = self._find_nearest_core()
             self.velocity = self._calc_velocity_to_core(core_position)
 
