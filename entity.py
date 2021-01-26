@@ -308,14 +308,13 @@ class Wall(pygame.sprite.Sprite):
 
     def _bounce_velocity(self,ent):
         """bounce back in the opposite direction of nearest wall block"""
-        dir = calc_const_velocity(ent.position, self.position, speed=ent.speed) # speed not needed
         closest_midpoint = find_closest_vector(ent.position,self.get_edge_midpoints())
         axis = get_rect_edge_axis(self.rect,closest_midpoint)
 
         if axis == "x":
-            return (dir[0],dir[1]*(-1.0))
+            return (ent.velocity[0],ent.velocity[1]*(-1.0))
         elif axis == "y":
-            return (dir[0]*(-1.0),dir[1])
+            return (ent.velocity[0]*(-1.0),ent.velocity[1])
         else:
             raise Exception("Incorrect bounce axis")
       
