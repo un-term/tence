@@ -11,7 +11,8 @@ from general_functions import *
 from entity_group import EntityGroup
 
 class GUI:
-    def __init__(self):
+    def __init__(self,state):
+        self.state = state
         self.display = pygame.display
     def start_display(self,winsize=[640, 480]):
         self.screen = self.display.set_mode(winsize)
@@ -136,7 +137,7 @@ def main():
 
     # entity_group.add_ent(wall_list)
 
-    gui = GUI()
+    gui = GUI(state)
     # sound = Sound()
     event = Event(state)
     facdustry = Game(state, gui, event, sound=None)
