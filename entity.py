@@ -298,7 +298,7 @@ class Wall(pygame.sprite.Sprite):
 
     def collision(self,ent):
         if ent.type == "baddie":
-            ent.velocity = self._bounce_velocity(ent,scalar=50)
+            ent.velocity = self._bounce_velocity(ent)
             ent.bounce_timestamp = self.entity_group.state.total_time
         else:
             pass
@@ -306,7 +306,7 @@ class Wall(pygame.sprite.Sprite):
     def get_edge_midpoints(self):
         return [self.rect.midtop,self.rect.midright,self.rect.midbottom,self.rect.midleft]
 
-    def _bounce_velocity(self,ent,scalar=1):
+    def _bounce_velocity(self,ent):
         """bounce back in the opposite direction of nearest wall block"""
         dir = calc_const_velocity(ent.position, self.position, speed=ent.speed) # speed not needed
         closest_midpoint = find_closest_vector(ent.position,self.get_edge_midpoints())
