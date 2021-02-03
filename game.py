@@ -11,10 +11,9 @@ from general_functions import *
 from entity_group import EntityGroup
 
 class GUI:
-    def __init__(self,state):
+    def __init__(self,state,ui_elements,winsize=[700, 700]):
         self.state = state
         self.display = pygame.display
-    def start_display(self,winsize=[640, 480]):
         self.screen = self.display.set_mode(winsize)
 
 # class Sound:
@@ -73,10 +72,7 @@ class Game:
         self.event = event
         self.sound = sound
 
-        self.winsize = (400,400)
-
         if gui: 
-            self.gui.start_display(winsize=[700, 700])
             if event:
                 self.event.game=self
 
