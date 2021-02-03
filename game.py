@@ -117,6 +117,10 @@ class Game:
 
 def main():
 
+    pygame.font.init()
+    try: pygame.font.get_init()
+    except: raise Exception("Fonts not initialising")
+
     ent_init_list = [
         # Baddie((200,400),speed=50.0),
         Turret((250,250)),
