@@ -227,6 +227,7 @@ class Baddie(pygame.sprite.Sprite):
         if self.health <= 0:
             # self.game.entity_group["remove"].add(self)
             self.entity_group.add_ent([self],["remove"])
+            self.entity_group.state.kill_count += 1
     
     def check_bounce(self,total_time, bounce_limit=0.5):
       return (total_time - self.bounce_timestamp <= bounce_limit)

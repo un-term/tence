@@ -61,6 +61,8 @@ class State:
         self.step_time = 0
         self.step = 0
 
+        self.kill_count = 0
+
     def end_game(self):
         self.game_over = 1
 
