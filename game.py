@@ -9,12 +9,25 @@ import random
 from entity import *
 from general_functions import *
 from entity_group import EntityGroup
+from ui_elements import *
 
 class GUI:
     def __init__(self,state,ui_elements,winsize=[700, 700]):
         self.state = state
+        self.size = winsize
         self.display = pygame.display
-        self.screen = self.display.set_mode(winsize)
+        self.screen = self.display.set_mode(self.size)
+        self.rect = self.screen.get_rect() 
+        self.ui_elements = ui_elements
+
+    def update(self):
+        for element in self.ui_elements:
+            element.update()
+
+    def draw(self,surface):
+        for element in self.ui_elements:
+            self.screen.blit(element.image,element.rect)
+
 
 # class Sound:
 #   """CHANGE: import list of sound files"""
@@ -27,23 +40,25 @@ class GUI:
 
 
 class Event:
-    def __init__(self, state):
+    def __init__(self, state, gui):
         self.state = state
+        self.gui = gui
         self.event = pygame.event
 
     def check_event(self):
         for event in self.event.get():
             self._check_quit(event)
-            self._check_click(event) # CHANGE - not dependent on pygame events
+            self._create_baddie_click(event) # CHANGE - not dependent on pygame events
 
     def _check_quit(self,event):
         if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
             self.state.game_over.end_game()
 
-    def _check_click(self,event):
-        if event.type == pygame.MOUSEBUTTONUP:
+    def _create_baddie_click(self,event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             self.state.entity_group.add_ent([Baddie(mouse_pos, speed=30)])
+        
 
 class State:
     def __init__(self, entity_group):
@@ -87,11 +102,14 @@ class Game:
           # update all sprites
           #-------------------------------------------------------------
             self.state.entity_group.get_group("all").update()
+            self.gui.update()
 
             if self.gui:
                 self.gui.display.update()
                 self.gui.screen.fill(BLACK)
                 self.state.entity_group.get_group("draw").draw(self.gui.screen)
+                self.gui.draw(self.gui.screen)
+
                 if self.event:
                     self.event.check_event()
                 if self.sound:
@@ -138,10 +156,17 @@ def main():
         entity_group.add_ent([Wall(point)])
 
     # entity_group.add_ent(wall_list)
+    gui = GUI(state,None)
 
-    gui = GUI(state)
+    ui_elements = [
+        KillCount(gui),
+        # CoreHealth(gui),
+        MenuBox(gui),
+        MenuCore(gui)
+    ]
+    gui.ui_elements = ui_elements
     # sound = Sound()
-    event = Event(state)
+    event = Event(state, gui)
     facdustry = Game(state, gui, event, sound=None)
     facdustry.loop(time_limit = 0, step_limit=0, constant_step_time=0)
 
