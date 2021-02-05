@@ -46,3 +46,18 @@ class MenuBox(pygame.sprite.Sprite):
 
     def update(self):
         pass
+
+class MenuCore(entity.Core):
+    def __init__(self,gui):
+        # Call the parent class (Sprite) constructor
+        super().__init__((0,0))
+        self.gui = gui
+        self.size = (30,30)
+        self.image = pygame.Surface(self.size)
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = vector_add(self.gui.rect.bottomleft,(5,-5))
+
+    def update(self):
+        pass
+        # self.rect.topleft = self.gui.screen.topleft
