@@ -32,3 +32,17 @@ class CoreHealth(pygame.sprite.Sprite):
         self.image = self.font.render(str(int(core.health)), True, RED, BLUE)
         self.rect = self.image.get_rect()
         self.rect.bottomright = self.gui.rect.bottomright
+
+class MenuBox(pygame.sprite.Sprite):
+    def __init__(self,gui):
+        # Call the parent class (Sprite) constructor
+        pygame.sprite.Sprite.__init__(self)
+        self.gui = gui
+        self.size = (self.gui.size[0],40)
+        self.image = pygame.Surface(self.size)
+        self.image.fill(GREY)
+        self.rect = self.image.get_rect()
+        self.rect.bottomleft = self.gui.rect.bottomleft
+
+    def update(self):
+        pass
