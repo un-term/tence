@@ -16,22 +16,8 @@ class KillCount(pygame.sprite.Sprite):
     def update(self):
         self.image = self.font.render(str(self.gui.state.kill_count), True, GREEN, BLUE)
         self.rect = self.image.get_rect()
+        self.rect.bottomright = self.menu_rect.bottomright
         # self.rect.topleft = self.gui.screen.topleft
-
-class CoreHealth(pygame.sprite.Sprite):
-    def __init__(self,gui):
-        # Call the parent class (Sprite) constructor
-        pygame.sprite.Sprite.__init__(self)
-        self.gui = gui
-        self.font = pygame.font.Font(pygame.font.get_default_font(),20)
-        self.image = None
-        self.rect = None
-
-    def update(self):
-        core = self.gui.state.entity_group.get_group("core").sprites()[0] #show 1 core only
-        self.image = self.font.render(str(int(core.health)), True, RED, BLUE)
-        self.rect = self.image.get_rect()
-        self.rect.bottomright = self.gui.rect.bottomright
 
 class MenuBox(pygame.sprite.Sprite):
     def __init__(self,gui):
@@ -41,8 +27,8 @@ class MenuBox(pygame.sprite.Sprite):
         self.size = (self.gui.size[0],40)
         self.image = pygame.Surface(self.size)
         self.image.fill(GREY)
-        self.rect = self.image.get_rect()
-        self.rect.bottomleft = self.gui.rect.bottomleft
+        self.rect = self.gui.self.menu_rect
+        self.rect.bottomleft = self.gui.menu_rect.bottomleft
 
     def update(self):
         pass
@@ -61,3 +47,28 @@ class MenuCore(entity.Core):
     def update(self):
         pass
         # self.rect.topleft = self.gui.screen.topleft
+
+class GUI:
+    def __init__(self,state,winsize=[700, 700]):
+        self.state = state
+        self.size = winsize
+        self.display = pygame.display
+        self.screen = self.display.set_mode(self.size)
+        self.screen_rect = self.screen.get_rect() 
+
+        # self.ui_elements = ui_elements
+
+        menu_height = 40
+        self.menu = pygame.Surface((self.size[0],menu_height))
+        self.menu_rect = self.menu.get_rect()
+        self.menu_rect.bottomleft == self.screen_rect.bottomleft
+
+        self.map = pygame.Surface((self.size[0],self.size[1]-menu_height))
+        self.map_rect = self.map.get_rect()
+        self.map_rect.bottomleft == self.menu_rect.topleft
+
+        self.element_group = pygame.sprite.OrderedUpdates()
+
+        self.element_group.add(MenuBox(self))
+        self.element_group.add(KillCount(self))
+        self.element_group.add(MenuCore(self))

@@ -9,25 +9,7 @@ import random
 from entity import *
 from general_functions import *
 from entity_group import EntityGroup
-from ui_elements import *
-
-class GUI:
-    def __init__(self,state,ui_elements,winsize=[700, 700]):
-        self.state = state
-        self.size = winsize
-        self.display = pygame.display
-        self.screen = self.display.set_mode(self.size)
-        self.rect = self.screen.get_rect() 
-        self.ui_elements = ui_elements
-
-    def update(self):
-        for element in self.ui_elements:
-            element.update()
-
-    def draw(self,surface):
-        for element in self.ui_elements:
-            self.screen.blit(element.image,element.rect)
-
+import gui
 
 # class Sound:
 #   """CHANGE: import list of sound files"""
@@ -156,15 +138,7 @@ def main():
         entity_group.add_ent([Wall(point)])
 
     # entity_group.add_ent(wall_list)
-    gui = GUI(state,None)
-
-    ui_elements = [
-        KillCount(gui),
-        # CoreHealth(gui),
-        MenuBox(gui),
-        MenuCore(gui)
-    ]
-    gui.ui_elements = ui_elements
+    gui = gui.GUI(state)
     # sound = Sound()
     event = Event(state, gui)
     facdustry = Game(state, gui, event, sound=None)
