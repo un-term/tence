@@ -84,7 +84,7 @@ class Game:
           # update all sprites
           #-------------------------------------------------------------
             self.state.entity_group.get_group("all").update()
-            self.gui.element_group.update()
+            # self.gui.element_group.update()
 
             if self.gui:
                 self.gui.draw()
