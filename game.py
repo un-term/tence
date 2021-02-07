@@ -87,10 +87,7 @@ class Game:
             self.gui.element_group.update()
 
             if self.gui:
-                self.gui.display.update()
-                self.gui.screen.fill(BLACK)
-                self.state.entity_group.get_group("draw").draw(self.gui.map)
-                self.gui.element_group.draw(self.gui.menu)
+                self.gui.draw()
 
                 if self.event:
                     self.event.check_event()
