@@ -9,7 +9,7 @@ import random
 from entity import *
 from general_functions import *
 from entity_group import EntityGroup
-import gui
+import gui_elements
 
 # class Sound:
 #   """CHANGE: import list of sound files"""
@@ -138,7 +138,7 @@ def main():
         entity_group.add_ent([Wall(point)])
 
     # entity_group.add_ent(wall_list)
-    gui = gui.GUI(state)
+    gui = gui_elements.GUI(state)
     # sound = Sound()
     event = Event(state, gui)
     facdustry = Game(state, gui, event, sound=None)
