@@ -209,7 +209,7 @@ class Baddie(pygame.sprite.Sprite):
         if self.entity_group.get_group("core") is not None:
             return self.entity_group.get_group("core").sprites()[0].position
         else:
-            return (0.0,0.0)       
+            return (0.0,0.0) # No core, head to origin instead       
 
     def _calc_velocity_to_core(self,core_position):
         return calc_const_velocity(self.position, core_position, self.speed)
