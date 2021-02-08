@@ -40,7 +40,46 @@ def find_closest_entity(ref_entity,entity_list):
             pass
     return closest_entity
 
-class LineSprite(pygame.sprite.Sprite):
+
+class Entity(pygame.sprite.Sprite):
+    def __init__(self):
+        # def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.size = None
+        self.position = None
+        self.colour = None
+        self.rect = None
+        self.image = None
+    
+    @property
+    def position(self):
+        return self._position
+    
+    @position.setter
+    def position(self,value):
+        self._position = value
+        self.rect.center = value
+
+    @property
+    def size(self):
+        return self._size
+
+    @size.setter
+    def size(self,value):
+        self._size = value
+        self.image = pygame.Surface(value)
+        self.rect = self.image.get_rect()
+
+    @property
+    def colour(self):
+        return self._colour
+
+    @colour.setter
+    def colour(self,value):
+        self._colour = value
+        self.image.fill(value)
+
+
     def __init__(self,colour, start, end):
         # def __init__(self):
         pygame.sprite.Sprite.__init__(self)
