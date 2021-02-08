@@ -71,10 +71,6 @@ class Game:
         self.event = event
         self.sound = sound
 
-        if gui: 
-            if event:
-                self.event.game=self
-
     #=================================================================
     def loop(self, time_limit=0, step_limit=0, constant_step_time=0):
         """main game loop"""
