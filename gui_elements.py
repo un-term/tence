@@ -107,5 +107,7 @@ class GUI:
 
         self.menu.blit(self.menu_box.image,self.menu_box.rect)
         self.screen.blit(self.menu,self.menu_rect)
-        
+
+        self.display.update()
+  
         #gui objects depend on others for position. Cannot stick into anoymous group
