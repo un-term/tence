@@ -93,8 +93,7 @@ class GUI:
         # self.element_group.add(MenuCore(self))
 
     def draw(self):
-        self.display.update()
-        self.screen.fill(BLACK)
+        self.map.fill(BLACK)
         self.state.entity_group.get_group("draw").draw(self.map)
         self.screen.blit(self.map,self.map_rect)
 
@@ -102,6 +101,7 @@ class GUI:
         #     self.menu.blit(element.image,element.rect)
             # self.element_group.draw(self.menu)
         # print(self.menu_rect.topleft)
+        self.menu.fill(BLACK)
         for item in self.menu_box.left_menu_list:
             self.menu_box.image.blit(item.image,item.rect)
 
