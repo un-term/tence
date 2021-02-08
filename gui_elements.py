@@ -93,6 +93,8 @@ class GUI:
         # self.element_group.add(MenuCore(self))
 
     def draw(self):
+        """The coordinate system of the surface being drawn onto,
+        is what is used"""
         self.map.fill(BLACK)
         self.state.entity_group.get_group("draw").draw(self.map)
         self.screen.blit(self.map,self.map_rect)
