@@ -80,26 +80,23 @@ class Entity(pygame.sprite.Sprite):
         self.image.fill(value)
 
 
+class LineSprite(Entity):
     def __init__(self,colour, start, end):
         # def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.entity_group = None
         self.type = "laser"
-        self.colour = RED
 
-        size = vector_abs(vector_subtract(start,end))
-        center = vector_vector_midpoint(end,start)
-
-        self.image = pygame.Surface(size)
-        self.image.fill(BLACK)
+        self.size = vector_abs(vector_subtract(start,end))
+        self.colour = BLACK
         self.image.set_colorkey(BLACK)
-        
-        self.rect = self.image.get_rect()
+
+        center = vector_vector_midpoint(end,start)
         self.rect.center = center
         # pygame.draw.aaline(self.image,self.colour,start,end)
         local_start = coord_sys_map_translation(self.rect.topleft, start)
         local_end = coord_sys_map_translation(self.rect.topleft, end)
-        pygame.draw.line(self.image,self.colour,local_start,local_end,3)
+        pygame.draw.line(self.image,RED,local_start,local_end,3)
         # line drawn on surface local coordinate system
 
     def update(self):
@@ -108,29 +105,24 @@ class Entity(pygame.sprite.Sprite):
     def collision(self,ent):
         pass
 
-class Turret(pygame.sprite.Sprite):
+
+class Turret(Entity):
     # Constructor
     def __init__(self,position):
         # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
         self.entity_group = None
         self.type = "turret"
-    
-        self.position = position
+
         self.size = (30,30)
+        self.position = position
+        self.colour = DEEPSKYBLUE
+    
         self.radius = 100 # shoot range - circle collision detection
         self.ammo = 5
         self.damage = 1
         self.reload_time = 0.2
         self.shoot_timestamp = 0
-
-        # body
-        self.image = pygame.Surface(self.size)
-        self.image.fill(DEEPSKYBLUE)
-        # Fetch the rectangle object that has the dimensions of the image
-        # Update the position of this object by setting the values of rect.x and rect.y
-        self.rect = self.image.get_rect()
-        self.rect.center = position
 
     def update(self):
         # Check for targets & fire
@@ -177,34 +169,25 @@ class Turret(pygame.sprite.Sprite):
         # self.entity_group.add_ent([self],["sound"])
         # self.game.sound.laser_sound.play()
 
-class Baddie(pygame.sprite.Sprite):
-    def __init__(self, initial_pos,speed=10.0):
+
+class Baddie(Entity):
+    def __init__(self, position,speed=10.0):
         pygame.sprite.Sprite.__init__(self)
         self.entity_group = None
         self.type = "baddie"
 
-        self.health = 2
         self.size = (10,10)
-        self.image = pygame.Surface(self.size)
-        self.image.fill(RED)
+        self.position = position
+        self.colour = RED
+
+        self.health = 2
         self.radius = 5 # circle collision detection
-        self.rect = self.image.get_rect()
-        self.position = initial_pos # set after rect creation CHANGE
 
         self.speed = speed # pixels per second - decimal important!
         self.velocity = (0,0)
         self.bounce_timestamp = 0
 
         self.damage = 1
-
-    @property
-    def position(self):
-        return self._position
-    
-    @position.setter
-    def position(self,value):
-        self._position = value
-        self.rect.center = value
 
     def update(self):
         """calls internal methods"""
@@ -272,23 +255,19 @@ class Baddie(pygame.sprite.Sprite):
       return (total_time - self.bounce_timestamp <= bounce_limit)
   
 
-class Core(pygame.sprite.Sprite):
+class Core(Entity):
     # Constructor
     def __init__(self,position):
         # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
         self.entity_group = None
         self.type = "core"
-    
-        self.position = position
+
         self.size = (50,50)
+        self.position = position
+        self.colour = GREEN
+
         self.radius = 25 # shoot range - circle collision detection
-
-        self.image = pygame.Surface(self.size)
-        self.image.fill(GREEN)
-        self.rect = self.image.get_rect()
-        self.rect.center = position
-
         self.health = 40.0
 
     def update(self):
@@ -310,23 +289,20 @@ class Core(pygame.sprite.Sprite):
 
     def _check_health(self):
         if self.health < 10:
-            self.image.fill(RED)
+            self.colour = RED
         elif self.health < 20:
-            self.image.fill(YELLOW)
+            self.colour = YELLOW
 
-class Wall(pygame.sprite.Sprite):
+
+class Wall(Entity):
     def __init__(self,position):
         pygame.sprite.Sprite.__init__(self)
         self.entity_group = None
         self.type = "wall"
 
-        self.position = position
         self.size = (10,10)
-
-        self.image = pygame.Surface(self.size)
-        self.image.fill(YELLOW)
-        self.rect = self.image.get_rect()
-        self.rect.center = position
+        self.position = position
+        self.colour = YELLOW
 
     def update(self):
         pass
