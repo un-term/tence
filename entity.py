@@ -43,7 +43,7 @@ def find_closest_entity(ref_entity,entity_list):
 
 class Entity(pygame.sprite.Sprite):
     def __init__(self):
-        # def __init__(self):
+        self.entity_group = None
         pygame.sprite.Sprite.__init__(self)
         self.size = None
         self.position = None
@@ -84,7 +84,6 @@ class LineSprite(Entity):
     def __init__(self,colour, start, end):
         # def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.entity_group = None
         self.type = "laser"
 
         self.size = vector_abs(vector_subtract(start,end))
@@ -111,7 +110,6 @@ class Turret(Entity):
     def __init__(self,position):
         # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
-        self.entity_group = None
         self.type = "turret"
 
         self.size = (30,30)
@@ -173,7 +171,6 @@ class Turret(Entity):
 class Baddie(Entity):
     def __init__(self, position,speed=10.0):
         pygame.sprite.Sprite.__init__(self)
-        self.entity_group = None
         self.type = "baddie"
 
         self.size = (10,10)
@@ -260,7 +257,6 @@ class Core(Entity):
     def __init__(self,position):
         # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
-        self.entity_group = None
         self.type = "core"
 
         self.size = (50,50)
@@ -297,7 +293,6 @@ class Core(Entity):
 class Wall(Entity):
     def __init__(self,position):
         pygame.sprite.Sprite.__init__(self)
-        self.entity_group = None
         self.type = "wall"
 
         self.size = (10,10)
