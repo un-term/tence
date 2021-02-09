@@ -89,6 +89,9 @@ class GUI:
         self.menu_box.add_left_menu_item(entity.Wall((0,0)))
         self.menu_box.add_left_menu_item(entity.Spawn((0,0)))
 
+        for item in self.menu_box.left_menu_list:
+            self.menu_box.image.blit(item.image,item.rect)
+
     def draw(self):
         """The coordinate system of the surface being drawn onto,
         is what is used"""
@@ -100,9 +103,8 @@ class GUI:
         #     self.menu.blit(element.image,element.rect)
             # self.element_group.draw(self.menu)
         # print(self.menu_rect.topleft)
-        self.menu.fill(BLACK)
-        for item in self.menu_box.left_menu_list:
-            self.menu_box.image.blit(item.image,item.rect)
+        # self.menu.fill(BLACK)
+        # self.menu_box.image.fill(BLACK)
 
         self.menu.blit(self.menu_box.image,self.menu_box.rect)
         self.screen.blit(self.menu,self.menu_rect)
