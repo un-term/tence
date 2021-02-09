@@ -169,7 +169,7 @@ class Turret(Entity):
 
 
 class Baddie(Entity):
-    def __init__(self, position,speed=10.0):
+    def __init__(self, position,speed=30.0):
         pygame.sprite.Sprite.__init__(self)
         self.type = "baddie"
 
