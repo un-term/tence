@@ -48,21 +48,21 @@ class MenuBox(pygame.sprite.Sprite):
             return True
         else:
             return False
+    
+    def select_entity(self,mouse_pos):
+        mouse_pos = coord_sys_map_translation(self.gui.menu_rect.topleft,mouse_pos)
+        entity = None
+        for menu_entity in self.left_menu_list:
+            if menu_entity.rect.collidepoint(mouse_pos):
+                print(self.create_entity(menu_entity))
+                entity = self.create_entity(menu_entity)
 
-class MenuCore(entity.Core):
-    def __init__(self):
-        # Call the parent class (Sprite) constructor
-        super().__init__((0,0))
-        # self.gui = gui
-        self.size = (30,30)
-        self.image = pygame.Surface(self.size)
-        self.image.fill(GREEN)
-        self.rect = self.image.get_rect()
-        # self.rect.bottomleft = vector_add(self.gui.menu_rect.bottomleft,(5,-5))
+        if entity: return entity
+        else : return None
 
-    def update(self):
-        pass
-        # self.rect.topleft = self.gui.screen.topleft
+    def create_entity(self,menu_entity):
+        try: return menu_entity.__class__((0,0))
+        except: raise Exception("Cannot instantiate class from menu selection")
 
 class GUI:
     def __init__(self,state,winsize=[700, 700]):
