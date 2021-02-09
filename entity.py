@@ -109,9 +109,7 @@ class LineSprite(Entity):
 
 
 class Turret(Entity):
-    # Constructor
     def __init__(self,position):
-        # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
         self.type = "turret"
 
@@ -132,9 +130,7 @@ class Turret(Entity):
             hit_list = self._check_for_targets(target_group)
             if hit_list:
                 self._shoot(hit_list[0],self.entity_group.state.total_time) # shoot first baddie in list only
-                # self.line=Line(RED, self.position, hit_list[0].position) # laser
                 laser = LineSprite(RED, self.position, hit_list[0].position)
-                # line[0].draw(self.game.screen)
                 self.entity_group.add_ent([laser],["draw","remove"])
 
     def collision(self,ent):
@@ -247,7 +243,6 @@ class Baddie(Entity):
     
     def _check_dead(self):
         if self.health <= 0:
-            # self.game.entity_group["remove"].add(self)
             self.entity_group.add_ent([self],["remove"])
             self.entity_group.state.kill_count += 1
     
@@ -258,7 +253,6 @@ class Baddie(Entity):
 class Core(Entity):
     # Constructor
     def __init__(self,position):
-        # Call the parent class (Sprite) constructor
         pygame.sprite.Sprite.__init__(self)
         self.type = "core"
 
@@ -326,8 +320,10 @@ class Wall(Entity):
             return (ent.velocity[0]*(-1.0),ent.velocity[1])
         else:
             raise Exception("Incorrect bounce axis")
-      
+
+
 class Spawn(Entity):
+    """Produces Baddie entities on Spawn position"""
     def __init__(self,position):
         pygame.sprite.Sprite.__init__(self)
         self.type = "spawn"
@@ -339,7 +335,6 @@ class Spawn(Entity):
         self.baddie_count = 0
         self.spawn_timestamp = 0
         self.spawn_wait = 1
-
 
     def update(self):
         self.spawn_baddie()
