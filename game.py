@@ -26,20 +26,29 @@ class Event:
         self.state = state
         self.gui = gui
         self.event = pygame.event
+        self.selected_entity = None
 
     def check_event(self):
         for event in self.event.get():
             self._check_quit(event)
-            self._create_baddie_click(event) # CHANGE - not dependent on pygame events
+            self._global_click_check(event) # CHANGE - not dependent on pygame events
 
     def _check_quit(self,event):
         if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
             self.state.game_over.end_game()
 
-    def _create_baddie_click(self,event):
+    def _global_click_check(self,event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
-            self.state.entity_group.add_ent([Baddie(mouse_pos, speed=30)])
+            if self.gui.map_rect.collidepoint(mouse_pos):
+                if self.selected_entity:
+                    self.selected_entity.position = mouse_pos #CHANGE - map coordinate system
+                    self.state.entity_group.add_ent([self.selected_entity])
+                    self.selected_entity = None
+
+            elif self.gui.menu_rect.collidepoint(mouse_pos):
+                if not self.selected_entity:
+                    self.selected_entity = self.gui.menu_box.select_entity(mouse_pos)                
         
 
 class State:
