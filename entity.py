@@ -324,3 +324,27 @@ class Wall(Entity):
         else:
             raise Exception("Incorrect bounce axis")
       
+class Spawn(Entity):
+    def __init__(self,position):
+        pygame.sprite.Sprite.__init__(self)
+        self.type = "spawn"
+
+        self.size = (20,20)
+        self.position = position
+        self.colour = ORANGE
+
+        self.baddie_count = 0
+        self.spawn_timestamp = 0
+        self.spawn_wait = 1
+
+
+    def update(self):
+        self.spawn_baddie()
+
+    def spawn_baddie(self):
+        if not self._check_spawn_wait():
+            self.entity_group.add_ent([Baddie(self.position)])
+            self.spawn_timestamp = self.entity_group.state.total_time
+
+    def _check_spawn_wait(self):
+        return self.entity_group.state.total_time - self.spawn_timestamp <= self.spawn_wait
