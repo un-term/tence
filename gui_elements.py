@@ -83,13 +83,11 @@ class GUI:
         self.map_rect = self.map.get_rect()
         self.map_rect.bottomleft = self.menu_rect.topleft
 
-        # self.element_group = pygame.sprite.OrderedUpdates()# CHANGE: name to menu
-
-        # self.element_group.add(MenuBox(self))
         self.menu_box = MenuBox(self)
-        self.menu_box.add_left_menu_item(MenuCore())
-        # self.element_group.add(KillCount(self))
-        # self.element_group.add(MenuCore(self))
+        self.menu_box.add_left_menu_item(entity.Core((0,0)))
+        self.menu_box.add_left_menu_item(entity.Turret((0,0)))
+        self.menu_box.add_left_menu_item(entity.Wall((0,0)))
+        self.menu_box.add_left_menu_item(entity.Spawn((0,0)))
 
     def draw(self):
         """The coordinate system of the surface being drawn onto,
