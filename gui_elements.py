@@ -35,14 +35,13 @@ class MenuBox(pygame.sprite.Sprite):
         pass
 
     def add_left_menu_item(self,menu_item):
-        if self.check_vertical_height(menu_item.size[1],self.size[1]):
-            offset = (5,0)
-            if not self.left_menu_list:
-                menu_item.rect.midleft = vector_add(self.rect.midleft,offset)
-                self.left_menu_list.append(menu_item)
-            else:
-                menu_item.rect.midleft = vector_add(self.left_menu_list[-1],offset)
-                self.left_menu_list.append(menu_item)
+        menu_item.size = (30,30)
+        offset = (5,0)
+        if not self.left_menu_list: 
+            menu_item.rect.midleft = vector_add(self.rect.midleft,offset)
+        else: 
+            menu_item.rect.midleft = vector_add(self.left_menu_list[-1].rect.midright,offset)
+        self.left_menu_list.append(menu_item)
 
     def check_vertical_height(self,height1,height2): #CHANGE: include horizontal limit also
         if height1 <= height2:
