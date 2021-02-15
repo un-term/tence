@@ -4,6 +4,69 @@ from constants import *
 from general_functions import *
 import entity
 
+class UserInterfaceElement():
+    def __init__(self,image,colour):
+        self.image = image
+        self.rect = self.image.get_rect()
+        if colour: self.image.fill(colour)
+        self.colour = colour
+        self.elements = []
+
+    def draw(self):
+        self.image.fill(self.colour)
+        for item in self.elements:
+            self.image.blit(item.image,item.rect)
+
+    def update(self):
+        pass
+
+    def add_elements(self,elements):
+        pass
+
+
+class MenuBox(UserInterfaceElement):
+    def __init__(self,image,colour):
+        UserInterfaceElement.__init__(self,image,colour)
+        self.menu_item_size = (30,30)
+        self.offset = 5 # 
+    
+    def add_elements(self,menu_items):
+        for count, item in enumerate(menu_items):
+            dist = self.menu_item_size[0] + self.offset
+            coord_x = dist * (count+1) - 0.5*self.menu_item_size[0]
+            # print("Coord: ", (coord_x,self.menu_item_size[1]/2.0))
+            # print(item.rect.midright)
+            item.position = (coord_x,self.rect.center[1])
+            item.size = self.menu_item_size
+
+            self.elements.append(item)
+
+
+class Menu(UserInterfaceElement):
+    def __init__(self,image,colour):
+        UserInterfaceElement.__init__(self,image,colour)
+
+    def add_elements(self,menu_box):
+        menu_box.rect.bottomleft = self.rect.bottomleft
+        self.elements = [menu_box]
+
+class Map(UserInterfaceElement):
+    def __init__(self,image,colour):
+        UserInterfaceElement.__init__(self,image,colour)
+    
+    def add_elements(self,entity_group):
+        self.elements = entity_group # iterable
+
+class Screen(UserInterfaceElement):
+    def __init__(self,image,colour):
+        UserInterfaceElement.__init__(self,image,colour)
+    
+    def add_elements(self,map,menu):
+        menu.rect.bottomleft = self.rect.bottomleft
+        map.rect.topleft = self.rect.topleft
+        self.elements = [map,menu]
+
+# CHANGE - not updated and won't work
 class KillCount(pygame.sprite.Sprite):
     def __init__(self,gui):
         # Call the parent class (Sprite) constructor
@@ -17,98 +80,37 @@ class KillCount(pygame.sprite.Sprite):
         self.image = self.font.render(str(self.gui.state.kill_count), True, GREEN, BLUE)
         self.rect = self.image.get_rect()
         self.rect.bottomright = self.gui.menu_rect.bottomright
-        # self.rect.topleft = self.gui.screen.topleft
-
-class MenuBox(pygame.sprite.Sprite):
-    def __init__(self,gui):
-        # Call the parent class (Sprite) constructor
-        pygame.sprite.Sprite.__init__(self)
-        self.gui = gui
-        self.size = self.gui.menu_rect.size
-        self.image = pygame.Surface(self.size)
-        self.image.fill(GREY)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (0,0)
-        self.left_menu_list = []
-
-    def update(self):
-        pass
-
-    def add_left_menu_item(self,menu_item):
-        menu_item.size = (30,30)
-        offset = (5,0)
-        if not self.left_menu_list: 
-            menu_item.rect.midleft = vector_add(self.rect.midleft,offset)
-        else: 
-            menu_item.rect.midleft = vector_add(self.left_menu_list[-1].rect.midright,offset)
-        self.left_menu_list.append(menu_item)
-
-    def check_vertical_height(self,height1,height2): #CHANGE: include horizontal limit also
-        if height1 <= height2:
-            return True
-        else:
-            return False
-    
-    def select_entity(self,mouse_pos):
-        mouse_pos = coord_sys_map_translation(self.gui.menu_rect.topleft,mouse_pos)
-        entity = None
-        for menu_entity in self.left_menu_list:
-            if menu_entity.rect.collidepoint(mouse_pos):
-                print(self.create_entity(menu_entity))
-                entity = self.create_entity(menu_entity)
-
-        if entity: return entity
-        else : return None
-
-    def create_entity(self,menu_entity):
-        try: return menu_entity.__class__((0,0))
-        except: raise Exception("Cannot instantiate class from menu selection")
 
 class GUI:
     def __init__(self,state,winsize=[700, 700]):
         self.state = state
         self.size = winsize
         self.display = pygame.display
-        self.screen = self.display.set_mode(self.size)
-        self.screen_rect = self.screen.get_rect() 
 
-        # self.ui_elements = ui_elements
-
+        # Instantiate   
         menu_height = 40
-        self.menu = pygame.Surface((self.size[0],menu_height))
-        self.menu_rect = self.menu.get_rect()
-        self.menu_rect.bottomleft = self.screen_rect.bottomleft
+        menu_surface = pygame.Surface((self.size[0],menu_height))
+        map_surface = pygame.Surface((self.size[0],self.size[1]-menu_height))
+        menu_box_surface = pygame.Surface((self.size[0],menu_height))
+        self.screen = Screen(self.display.set_mode(self.size),BLACK)
+        self.map = Map(map_surface,BLACK)
+        self.menu = Menu(menu_surface,BLACK)
+        self.menu_box = MenuBox(menu_box_surface,GREY)
+        menu_box_items = [entity.Core((0,0)),entity.Turret((0,0)),entity.Wall((0,0)),entity.Spawn((0,0))]
 
-        self.map = pygame.Surface((self.size[0],self.size[1]-menu_height))
-        self.map_rect = self.map.get_rect()
-        self.map_rect.bottomleft = self.menu_rect.topleft
-
-        self.menu_box = MenuBox(self)
-        self.menu_box.add_left_menu_item(entity.Core((0,0)))
-        self.menu_box.add_left_menu_item(entity.Turret((0,0)))
-        self.menu_box.add_left_menu_item(entity.Wall((0,0)))
-        self.menu_box.add_left_menu_item(entity.Spawn((0,0)))
-
-        for item in self.menu_box.left_menu_list:
-            self.menu_box.image.blit(item.image,item.rect)
+        # Add elements to UI parent 
+        self.menu_box.add_elements(menu_box_items)
+        self.menu.add_elements(self.menu_box)
+        self.map.add_elements(self.state.entity_group.get_group("draw"))
+        self.screen.add_elements(self.map,self.menu)
 
     def draw(self):
-        """The coordinate system of the surface being drawn onto,
-        is what is used"""
-        self.map.fill(BLACK)
-        self.state.entity_group.get_group("draw").draw(self.map)
-        self.screen.blit(self.map,self.map_rect)
+        """Draws using the coordinate system of the surface being drawn onto"""
 
-        # for element in self.element_group:
-        #     self.menu.blit(element.image,element.rect)
-            # self.element_group.draw(self.menu)
-        # print(self.menu_rect.topleft)
-        # self.menu.fill(BLACK)
-        # self.menu_box.image.fill(BLACK)
-
-        self.menu.blit(self.menu_box.image,self.menu_box.rect)
-        self.screen.blit(self.menu,self.menu_rect)
+        # draw order important - first drawn on bottom
+        self.menu_box.draw()
+        self.menu.draw()
+        self.map.draw()
+        self.screen.draw()
 
         self.display.update()
-  
-        #gui objects depend on others for position. Cannot stick into anoymous group
