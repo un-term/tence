@@ -42,6 +42,7 @@ def find_closest_entity(ref_entity,entity_list):
 
 
 class Entity(pygame.sprite.Sprite):
+    """Avoid setting rect position, instead use position member variable"""
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.entity_group = None
@@ -74,7 +75,11 @@ class Entity(pygame.sprite.Sprite):
         self.image = pygame.Surface(value)
         try: self.image.fill(self.colour)
         except: pass
+        try: center = self.rect.center
+        except: pass
         self.rect = self.image.get_rect()
+        try: self.position = center
+        except: pass
 
     @colour.setter
     def colour(self,value):
