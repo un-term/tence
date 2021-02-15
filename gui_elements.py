@@ -12,16 +12,19 @@ class UserInterfaceElement():
         self.colour = colour
         self.elements = []
 
-    def draw(self):
-        self.image.fill(self.colour)
-        for item in self.elements:
-            self.image.blit(item.image,item.rect)
 
     def update(self):
         pass
 
     def add_elements(self,elements):
         pass
+
+    def draw(self):
+        # self.image.fill(self.colour)
+        for item in self.elements:
+            self.image.blit(item.image,item.rect)
+            try: item.draw()
+            except: pass
 
 
 class MenuBox(UserInterfaceElement):
@@ -107,10 +110,6 @@ class GUI:
     def draw(self):
         """Draws using the coordinate system of the surface being drawn onto"""
 
-        # draw order important - first drawn on bottom
-        self.menu_box.draw()
-        self.menu.draw()
-        self.map.draw()
-        self.screen.draw()
+        self.screen.draw() # Recursion through depends
 
         self.display.update()
