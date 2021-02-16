@@ -21,11 +21,11 @@ class UserInterfaceElement():
 
     def draw(self):
         # self.image.fill(self.colour)
-        for item in self.elements:
-            self.image.blit(item.image,item.rect)
-            try: item.draw()
-            except: pass
-
+        try:
+            for item in self.elements:
+                self.image.blit(item.image,item.rect)
+                item.draw()
+        except: pass
 
 class MenuBox(UserInterfaceElement):
     def __init__(self,image,colour):
