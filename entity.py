@@ -51,6 +51,7 @@ class Entity(pygame.sprite.Sprite):
         self.position = None
         self.rect = None
         self.image = None
+        self.selectable = False
     
     @property
     def position(self):

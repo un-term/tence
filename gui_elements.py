@@ -27,6 +27,19 @@ class UserInterfaceElement():
                 item.draw()
         except: pass
 
+    def click(self,mouse_pos, selected):
+        try:
+            mouse_pos = coord_sys_map_translation(self.rect.topleft,mouse_pos)
+            if self.rect.collidepoint(mouse_pos):
+                if self.selectable:
+                    selected = self
+                else:
+                    for item in self.elements:
+                        item.click(mouse_pos, selected)
+
+        except: pass
+
+
 class MenuBox(UserInterfaceElement):
     def __init__(self,image,colour):
         UserInterfaceElement.__init__(self,image,colour)
@@ -41,6 +54,7 @@ class MenuBox(UserInterfaceElement):
             # print(item.rect.midright)
             item.position = (coord_x,self.rect.center[1])
             item.size = self.menu_item_size
+            item.selectable = True
 
             self.elements.append(item)
 
@@ -107,9 +121,15 @@ class GUI:
         self.map.add_elements(self.state.entity_group.get_group("draw"))
         self.screen.add_elements(self.map,self.menu)
 
+        self.selected = None
+
     def draw(self):
         """Draws using the coordinate system of the surface being drawn onto"""
 
         self.screen.draw() # Recursion through depends
 
         self.display.update()
+
+    def click_select(self,mouse_pos):
+        self.screen.click(mouse_pos,self.selected)
+        print(self.selected)
