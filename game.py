@@ -40,15 +40,7 @@ class Event:
     def _global_click_check(self,event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
-            if self.gui.map_rect.collidepoint(mouse_pos):
-                if self.selected_entity:
-                    self.selected_entity.position = mouse_pos #CHANGE - map coordinate system
-                    self.state.entity_group.add_ent([self.selected_entity])
-                    self.selected_entity = None
-
-            elif self.gui.menu_rect.collidepoint(mouse_pos):
-                if not self.selected_entity:
-                    self.selected_entity = self.gui.menu_box.select_entity(mouse_pos)                
+            self.gui.click_select(mouse_pos)
         
 
 class State:
