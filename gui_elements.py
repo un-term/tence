@@ -3,125 +3,107 @@ import pygame
 from constants import *
 from general_functions import *
 import entity
+import graphical_surface
 
-class UserInterfaceElement():
-    def __init__(self,image,colour):
-        self.image = image
-        self.rect = self.image.get_rect()
-        if colour: self.image.fill(colour)
-        self.colour = colour
-        self.elements = []
+class MenuBox(graphical_surface.GraphicalSurface):
+    def __init__(self,parent):
+        graphical_surface.GraphicalSurface.__init__(self,parent)
 
+        self.colour = GREY
+        self.size = self.ui_parent.size
+        self.set_surface_rect(self.size,self.colour)
+        self.rect.topleft = (0,0) # relative to parent
 
-    def update(self):
-        pass
-
-    def add_elements(self,elements):
-        pass
-
-    def draw(self):
-        # self.image.fill(self.colour)
-        try:
-            for item in self.elements:
-                self.image.blit(item.image,item.rect)
-                item.draw()
-        except: pass
-
-    def click(self,mouse_pos, selected):
-        try:
-            mouse_pos = coord_sys_map_translation(self.rect.topleft,mouse_pos)
-            if self.rect.collidepoint(mouse_pos):
-                if self.selectable:
-                    selected = self
-                else:
-                    for item in self.elements:
-                        item.click(mouse_pos, selected)
-
-        except: pass
-
-
-class MenuBox(UserInterfaceElement):
-    def __init__(self,image,colour):
-        UserInterfaceElement.__init__(self,image,colour)
+        self.menu_entity_offset = 5
         self.menu_item_size = (30,30)
-        self.offset = 5 # 
-    
-    def add_elements(self,menu_items):
-        for count, item in enumerate(menu_items):
-            dist = self.menu_item_size[0] + self.offset
+
+    def add_menu_entity(self,entity_menu_items):
+        for count, item in enumerate(entity_menu_items):
+            # print(item)
+            dist = self.menu_item_size[0] + self.menu_entity_offset
             coord_x = dist * (count+1) - 0.5*self.menu_item_size[0]
             # print("Coord: ", (coord_x,self.menu_item_size[1]/2.0))
             # print(item.rect.midright)
             item.position = (coord_x,self.rect.center[1])
-            item.size = self.menu_item_size
+            item.change_size(self.menu_item_size)
             item.selectable = True
 
-            self.elements.append(item)
+            self.ui_children.append(item)  
 
 
-class Menu(UserInterfaceElement):
-    def __init__(self,image,colour):
-        UserInterfaceElement.__init__(self,image,colour)
+class Menu(graphical_surface.GraphicalSurface):
+    def __init__(self,parent,menu_height):
+        graphical_surface.GraphicalSurface.__init__(self,parent)
 
-    def add_elements(self,menu_box):
-        menu_box.rect.bottomleft = self.rect.bottomleft
-        self.elements = [menu_box]
+        self.menu_height = menu_height
+        self.colour = BLACK
+        self.size = (self.ui_parent.size[0],self.menu_height)
+        self.set_surface_rect(self.size,self.colour)
+        self.rect.topleft = (0,self.ui_parent.size[1] - self.menu_height) # relative to parent
 
-class Map(UserInterfaceElement):
-    def __init__(self,image,colour):
-        UserInterfaceElement.__init__(self,image,colour)
-    
-    def add_elements(self,entity_group):
-        self.elements = entity_group # iterable
 
-class Screen(UserInterfaceElement):
-    def __init__(self,image,colour):
-        UserInterfaceElement.__init__(self,image,colour)
-    
-    def add_elements(self,map,menu):
-        menu.rect.bottomleft = self.rect.bottomleft
-        map.rect.topleft = self.rect.topleft
-        self.elements = [map,menu]
+class Map(graphical_surface.GraphicalSurface):
+    def __init__(self,parent,menu_height):
+        graphical_surface.GraphicalSurface.__init__(self,parent)
 
+        self.menu_height = menu_height
+        self.colour = BLACK
+        self.size = (self.ui_parent.size[0],self.ui_parent.size[1] - self.menu_height)
+        self.set_surface_rect(self.size,self.colour)
+        self.rect.topleft = self.ui_parent.rect.topleft # relative to parent
+
+    def add_entity(self,entity_group):
+        self.ui_children = entity_group
+
+
+class Screen(graphical_surface.GraphicalSurface):
+    def __init__(self,parent,display,size):
+        graphical_surface.GraphicalSurface.__init__(self,parent)
+
+        self.colour = BLACK
+        self.size = size
+        self.set_surface_rect(self.size,self.colour)
+        self.surface = display.set_mode(size) # Overwrite surface
+
+        
 # CHANGE - not updated and won't work
-class KillCount(pygame.sprite.Sprite):
-    def __init__(self,gui):
-        # Call the parent class (Sprite) constructor
-        pygame.sprite.Sprite.__init__(self)
-        self.gui = gui
-        self.font = pygame.font.Font(pygame.font.get_default_font(),20)
-        self.image = None
-        self.rect = None
+# class KillCount(pygame.sprite.Sprite):
+#     def __init__(self,gui):
+#         # Call the parent class (Sprite) constructor
+#         pygame.sprite.Sprite.__init__(self)
+#         self.gui = gui
+#         self.font = pygame.font.Font(pygame.font.get_default_font(),20)
+#         self.image = None
+#         self.rect = None
 
-    def update(self):
-        self.image = self.font.render(str(self.gui.state.kill_count), True, GREEN, BLUE)
-        self.rect = self.image.get_rect()
-        self.rect.bottomright = self.gui.menu_rect.bottomright
+#     def update(self):
+#         self.image = self.font.render(str(self.gui.state.kill_count), True, GREEN, BLUE)
+#         self.rect = self.image.get_rect()
+#         self.rect.bottomright = self.gui.menu_rect.bottomright
 
 class GUI:
-    def __init__(self,state,winsize=[700, 700]):
+    def __init__(self,state,winsize=(700, 700)):
         self.state = state
         self.size = winsize
         self.display = pygame.display
 
-        # Instantiate   
-        menu_height = 40
-        menu_surface = pygame.Surface((self.size[0],menu_height))
-        map_surface = pygame.Surface((self.size[0],self.size[1]-menu_height))
-        menu_box_surface = pygame.Surface((self.size[0],menu_height))
-        self.screen = Screen(self.display.set_mode(self.size),BLACK)
-        self.map = Map(map_surface,BLACK)
-        self.menu = Menu(menu_surface,BLACK)
-        self.menu_box = MenuBox(menu_box_surface,GREY)
-        menu_box_items = [entity.Core((0,0)),entity.Turret((0,0)),entity.Wall((0,0)),entity.Spawn((0,0))]
+        # Instantiate surfaces
+        self.screen = Screen(None,self.display,self.size)
+        menu_height=40
+        self.map = Map(self.screen,menu_height)
+        self.map.add_entity(self.state.entity_group.get_group("draw"))
+        menu = Menu(self.screen,menu_height)
+        menu_box = MenuBox(menu)
+        entity_menu_items = [entity.Core((0,0)),entity.Turret((0,0)),entity.Wall((0,0)),entity.Spawn((0,0))]
+        menu_box.add_menu_entity(entity_menu_items)
 
-        # Add elements to UI parent 
-        self.menu_box.add_elements(menu_box_items)
-        self.menu.add_elements(self.menu_box)
-        self.map.add_elements(self.state.entity_group.get_group("draw"))
-        self.screen.add_elements(self.map,self.menu)
+        ui_element_list = [self.screen,self.map,menu,menu_box]
+        # populate ui_children
+        for item in ui_element_list:
+            if item.ui_parent:
+                item.ui_parent.ui_children.append(item)
 
-        self.selected = None
+        self.selected_list = []
 
     def draw(self):
         """Draws using the coordinate system of the surface being drawn onto"""
@@ -130,6 +112,9 @@ class GUI:
 
         self.display.update()
 
-    def click_select(self,mouse_pos):
-        self.screen.click(mouse_pos,self.selected)
-        print(self.selected)
+    def click(self,mouse_pos):
+        if self.selected_list:
+            self.screen.click_placement(mouse_pos,self.screen.rect,self.selected_list[0],self.map.rect,self.state)
+            self.selected_list = []
+        else:
+            self.screen.click_select(mouse_pos,self.screen.rect,self.selected_list)

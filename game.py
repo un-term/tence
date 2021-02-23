@@ -40,7 +40,7 @@ class Event:
     def _global_click_check(self,event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
-            self.gui.click_select(mouse_pos)
+            self.gui.click(mouse_pos)
         
 
 class State:

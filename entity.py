@@ -4,6 +4,7 @@ import random
 
 from general_functions import *
 from constants import *
+import graphical_surface
 
 def check_for_type(ent_list, ent_type):
     exists = False
@@ -40,71 +41,37 @@ def find_closest_entity(ref_entity,entity_list):
             pass
     return closest_entity
 
+class Entity(graphical_surface.GraphicalSurface):
+    def __init__(self,parent=None):
+        graphical_surface.GraphicalSurface.__init__(self,parent)
 
-class Entity(pygame.sprite.Sprite):
-    """Avoid setting rect position, instead use position member variable"""
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.entity_group = None
-        self.colour = None
-        self.size = None
-        self.position = None
-        self.rect = None
-        self.image = None
-        self.selectable = False
-    
     @property
     def position(self):
         return self._position
-    
-    @property
-    def size(self):
-        return self._size
-
-    @property
-    def colour(self):
-        return self._colour
 
     @position.setter
     def position(self,value):
         self._position = value
         self.rect.center = value
 
-    @size.setter
-    def size(self,value):
-        self._size = value
-        self.image = pygame.Surface(value)
-        try: self.image.fill(self.colour)
-        except: pass
-        try: center = self.rect.center
-        except: pass
-        self.rect = self.image.get_rect()
-        try: self.position = center
-        except: pass
-
-    @colour.setter
-    def colour(self,value):
-        self._colour = value
-        try: self.image.fill(value)
-        except: pass
-
 
 class LineSprite(Entity):
     def __init__(self,colour, start, end):
         # def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
+        Entity.__init__(self)
         self.type = "laser"
 
         self.size = vector_abs(vector_subtract(start,end))
         self.colour = BLACK
-        self.image.set_colorkey(BLACK)
+        self.set_surface_rect(self.size,self.colour)
+        self.surface.set_colorkey(BLACK)
 
         center = vector_vector_midpoint(end,start)
         self.rect.center = center
-        # pygame.draw.aaline(self.image,self.colour,start,end)
+        # pygame.draw.aaline(self.surface,self.colour,start,end)
         local_start = coord_sys_map_translation(self.rect.topleft, start)
         local_end = coord_sys_map_translation(self.rect.topleft, end)
-        pygame.draw.line(self.image,RED,local_start,local_end,3)
+        pygame.draw.line(self.surface,RED,local_start,local_end,3)
         # line drawn on surface local coordinate system
 
     def update(self):
@@ -116,12 +83,13 @@ class LineSprite(Entity):
 
 class Turret(Entity):
     def __init__(self,position):
-        pygame.sprite.Sprite.__init__(self)
+        Entity.__init__(self)
         self.type = "turret"
 
         self.size = (30,30)
-        self.position = position
         self.colour = DEEPSKYBLUE
+        self.set_surface_rect(self.size,self.colour)
+        self.position = position
     
         self.radius = 100 # shoot range - circle collision detection
         self.ammo = 5
@@ -175,12 +143,13 @@ class Turret(Entity):
 
 class Baddie(Entity):
     def __init__(self, position,speed=30.0):
-        pygame.sprite.Sprite.__init__(self)
+        Entity.__init__(self)
         self.type = "baddie"
 
         self.size = (10,10)
-        self.position = position
         self.colour = RED
+        self.set_surface_rect(self.size,self.colour)
+        self.position = position
 
         self.health = 2
         self.radius = 5 # circle collision detection
@@ -259,12 +228,13 @@ class Baddie(Entity):
 class Core(Entity):
     # Constructor
     def __init__(self,position):
-        pygame.sprite.Sprite.__init__(self)
+        Entity.__init__(self)
         self.type = "core"
 
         self.size = (50,50)
-        self.position = position
         self.colour = GREEN
+        self.set_surface_rect(self.size,self.colour)
+        self.position = position
 
         self.radius = 25 # shoot range - circle collision detection
         self.health = 40.0
@@ -295,12 +265,14 @@ class Core(Entity):
 
 class Wall(Entity):
     def __init__(self,position):
-        pygame.sprite.Sprite.__init__(self)
+        Entity.__init__(self)
         self.type = "wall"
 
         self.size = (10,10)
-        self.position = position
         self.colour = YELLOW
+        self.set_surface_rect(self.size,self.colour)
+        self.position = position
+        
 
     def update(self):
         pass
@@ -331,12 +303,13 @@ class Wall(Entity):
 class Spawn(Entity):
     """Produces Baddie entities on Spawn position"""
     def __init__(self,position):
-        pygame.sprite.Sprite.__init__(self)
+        Entity.__init__(self)
         self.type = "spawn"
 
         self.size = (20,20)
-        self.position = position
         self.colour = ORANGE
+        self.set_surface_rect(self.size,self.colour)
+        self.position = position
 
         self.baddie_count = 0
         self.spawn_timestamp = 0
