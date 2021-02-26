@@ -84,6 +84,7 @@ class Game:
             # self.gui.element_group.update()
 
             if self.gui:
+                self.gui.update()
                 self.gui.draw()
 
                 if self.event:

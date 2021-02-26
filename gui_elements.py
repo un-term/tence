@@ -5,12 +5,35 @@ from general_functions import *
 import entity
 import graphical_surface
 
+
+class SelectionBox(graphical_surface.GraphicalSurface):
+    def __init__(self,parent,menu_height,selected_list):
+        graphical_surface.GraphicalSurface.__init__(self,parent)
+        
+        self.colour = BLACK
+        self.size = (menu_height,menu_height)
+        self.set_surface_rect(self.size,self.colour)
+        self.rect.topright = (self.ui_parent.rect.topright[0],0) # relative to parent
+        self.store_surface = self.surface
+
+        self.selected_list = selected_list # ref
+
+    def update_gui(self):
+        if self.selected_list:
+            self.surface = self.selected_list[0].surface.copy()
+            self.change_size(self.size)
+        else: self.surface = self.store_surface 
+
+        for item in self.ui_children:
+            item.update_gui()
+
+
 class MenuBox(graphical_surface.GraphicalSurface):
-    def __init__(self,parent):
+    def __init__(self,parent,menu_height):
         graphical_surface.GraphicalSurface.__init__(self,parent)
 
         self.colour = GREY
-        self.size = self.ui_parent.size
+        self.size = (self.ui_parent.size[0]-menu_height,self.ui_parent.size[1])
         self.set_surface_rect(self.size,self.colour)
         self.rect.topleft = (0,0) # relative to parent
 
@@ -87,23 +110,27 @@ class GUI:
         self.size = winsize
         self.display = pygame.display
 
+        self.selected_list = []
+
         # Instantiate surfaces
         self.screen = Screen(None,self.display,self.size)
         menu_height=40
         self.map = Map(self.screen,menu_height)
         self.map.add_entity(self.state.entity_group.get_group("draw"))
         menu = Menu(self.screen,menu_height)
-        menu_box = MenuBox(menu)
+        menu_box = MenuBox(menu,menu_height)
+        selection_box = SelectionBox(menu,menu_height,self.selected_list)
         entity_menu_items = [entity.Core((0,0)),entity.Turret((0,0)),entity.Wall((0,0)),entity.Spawn((0,0))]
         menu_box.add_menu_entity(entity_menu_items)
 
-        ui_element_list = [self.screen,self.map,menu,menu_box]
+        ui_element_list = [self.screen,self.map,menu,menu_box,selection_box]
         # populate ui_children
         for item in ui_element_list:
             if item.ui_parent:
                 item.ui_parent.ui_children.append(item)
 
-        self.selected_list = []
+    def update(self):
+        self.screen.update_gui()
 
     def draw(self):
         """Draws using the coordinate system of the surface being drawn onto"""
@@ -115,6 +142,6 @@ class GUI:
     def click(self,mouse_pos):
         if self.selected_list:
             self.screen.click_placement(mouse_pos,self.screen.rect,self.selected_list[0],self.map.rect,self.state)
-            self.selected_list = []
+            self.selected_list.clear()
         else:
             self.screen.click_select(mouse_pos,self.screen.rect,self.selected_list)

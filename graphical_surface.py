@@ -19,11 +19,9 @@ class GraphicalSurface(pygame.sprite.Sprite):
         self.rect = self._set_rect(size)
 
     def change_size(self,size):
-        self.surface = self._set_surface(size)
-        if self.colour: self._set_surface_colour(self.surface,self.colour)
-        center = self.rect.center
-        self.rect = self._set_rect(size)
-        self.rect.center = center
+        self.surface = pygame.transform.smoothscale(self.surface,size)
+        D_size = vector_subtract(size,self.rect.size)
+        self.rect.inflate_ip(D_size)
 
     def change_position(self,rect_place,coord):
         rect_place = coord
@@ -40,13 +38,16 @@ class GraphicalSurface(pygame.sprite.Sprite):
     def update(self):
         pass
 
+    def update_gui(self):
+        for item in self.ui_children:
+            item.update_gui()
+
     def draw(self):
         if self.colour:
             self.surface.fill(self.colour)
         for item in self.ui_children:
             self.surface.blit(item.surface,item.rect)
-            try: item.draw()
-            except: pass
+            item.draw()
 
     def click_select(self,mouse_pos, parent_rect, selected_list):
         mouse_pos = coord_sys_map_translation(parent_rect.topleft,mouse_pos)
@@ -55,15 +56,13 @@ class GraphicalSurface(pygame.sprite.Sprite):
             if self.selectable: selected_list.append(self.__class__((0,0)))
             if not selected_list:
                 for item in self.ui_children:
-                    try: item.click_select(mouse_pos, parent_rect, selected_list)
-                    except: pass
+                    item.click_select(mouse_pos, parent_rect, selected_list)
 
     def click_placement(self,mouse_pos, parent_rect, selected, target_rect, state):
         mouse_pos = coord_sys_map_translation(parent_rect.topleft,mouse_pos)
         parent_rect = self.rect
         if target_rect.collidepoint(mouse_pos):
             selected.position = mouse_pos
-            print(selected, selected.position)
             state.entity_group.add_ent([selected])
         else:
             for item in self.ui_children:
