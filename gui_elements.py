@@ -6,23 +6,32 @@ import entity
 import graphical_surface
 
 
+class SimpleStore:
+    def __init__(self):
+        self.shelf = None
+
+    def change(self,value):
+        self.shelf = value
+
+
 class SelectionBox(graphical_surface.GraphicalSurface):
-    def __init__(self,parent,menu_height,selected_list):
+    def __init__(self,parent,menu_height,selection_store):
         graphical_surface.GraphicalSurface.__init__(self,parent)
         
         self.colour = BLACK
-        self.size = (menu_height,menu_height)
-        self.set_surface_rect(self.size,self.colour)
-        self.rect.topright = (self.ui_parent.rect.topright[0],0) # relative to parent
+        self.size = (menu_height, menu_height)
+        self.set_surface_rect(self.size, self.colour)
+        self.rect.topright = (self.ui_parent.rect.topright[0], 0) # relative to parent
         self.store_surface = self.surface
 
-        self.selected_list = selected_list # ref
+        self.selection_store = selection_store # ref
 
     def update_gui(self):
-        if self.selected_list:
-            self.surface = self.selected_list[0].surface.copy()
+        if self.selection_store.shelf:
+            self.surface = self.selection_store.shelf.surface.copy()
             self.change_size(self.size)
-        else: self.surface = self.store_surface 
+        else:
+            self.surface = self.store_surface 
 
         for item in self.ui_children:
             item.update_gui()
@@ -42,16 +51,23 @@ class MenuBox(graphical_surface.GraphicalSurface):
 
     def add_menu_entity(self,entity_menu_items):
         for count, item in enumerate(entity_menu_items):
-            # print(item)
             dist = self.menu_item_size[0] + self.menu_entity_offset
             coord_x = dist * (count+1) - 0.5*self.menu_item_size[0]
-            # print("Coord: ", (coord_x,self.menu_item_size[1]/2.0))
-            # print(item.rect.midright)
             item.position = (coord_x,self.rect.center[1])
             item.change_size(self.menu_item_size)
             item.selectable = True
 
-            self.ui_children.append(item)  
+            self.ui_children.append(item)
+
+    def click(self,local_coord):
+        found = None
+        for item in self.ui_children:
+            if item.rect.collidepoint(local_coord):
+                found = item
+        if found:
+            return found.__class__((0,0))
+        else:
+            return None
 
 
 class Menu(graphical_surface.GraphicalSurface):
@@ -77,6 +93,10 @@ class Map(graphical_surface.GraphicalSurface):
 
     def add_entity(self,entity_group):
         self.ui_children = entity_group
+
+    def add_selection(self, state, selection, local_mouse_pos):
+        selection.position = local_mouse_pos
+        state.entity_group.add_ent([selection])
 
 
 class Screen(graphical_surface.GraphicalSurface):
@@ -110,38 +130,66 @@ class GUI:
         self.size = winsize
         self.display = pygame.display
 
-        self.selected_list = []
+        # self.selected_list = []
+        self.selection_store = SimpleStore()
+        self.ui_elements = {}
 
         # Instantiate surfaces
-        self.screen = Screen(None,self.display,self.size)
-        menu_height=40
-        self.map = Map(self.screen,menu_height)
-        self.map.add_entity(self.state.entity_group.get_group("draw"))
-        menu = Menu(self.screen,menu_height)
-        menu_box = MenuBox(menu,menu_height)
-        selection_box = SelectionBox(menu,menu_height,self.selected_list)
+        self.ui_elements["screen"] = Screen(None,self.display,self.size)
+        menu_height = 40
+        self.ui_elements["map"] = Map(self.ui_elements["screen"],menu_height)
+        self.ui_elements["map"].add_entity(self.state.entity_group.get_group("draw")) # Add entiies to map surface
+        self.ui_elements["menu"] = Menu(self.ui_elements["screen"],menu_height)
+        self.ui_elements["menu_box"] = MenuBox(self.ui_elements["menu"],menu_height)
+        self.ui_elements["selection_box"] = SelectionBox(self.ui_elements["menu"],menu_height,self.selection_store)
         entity_menu_items = [entity.Core((0,0)),entity.Turret((0,0)),entity.Wall((0,0)),entity.Spawn((0,0))]
-        menu_box.add_menu_entity(entity_menu_items)
+        self.ui_elements["menu_box"].add_menu_entity(entity_menu_items)
 
-        ui_element_list = [self.screen,self.map,menu,menu_box,selection_box]
         # populate ui_children
-        for item in ui_element_list:
+        for item in self.ui_elements.values():
             if item.ui_parent:
                 item.ui_parent.ui_children.append(item)
 
     def update(self):
-        self.screen.update_gui()
+        self.ui_elements["screen"].update_gui() # Recursion
 
     def draw(self):
         """Draws using the coordinate system of the surface being drawn onto"""
-
-        self.screen.draw() # Recursion through depends
-
+        self.ui_elements["screen"].draw() # Recursion through depends
         self.display.update()
 
     def click(self,mouse_pos):
-        if self.selected_list:
-            self.screen.click_placement(mouse_pos,self.screen.rect,self.selected_list[0],self.map.rect,self.state)
-            self.selected_list.clear()
+
+        coord_store = SimpleStore()
+        
+        screen = self.ui_elements["screen"]
+        map = self.ui_elements["map"]
+        menu = self.ui_elements["menu"]
+        menu_box = self.ui_elements["menu_box"]
+
+        # Selection - placement
+        if map.rect.collidepoint(mouse_pos):
+            if self.selection_store.shelf:
+                mouse_pos = coord_sys_map_translation(map.rect.topleft, mouse_pos)
+                map.add_selection(self.state, self.selection_store.shelf, mouse_pos)
+                self.selection_store.change(None)
+
+        # Selection - store
+        elif menu.rect.collidepoint(mouse_pos):
+
+            self.get_local_coord_from_target(mouse_pos, screen, menu_box, coord_store)
+            if coord_store.shelf:
+                self.selection_store.change(menu_box.click(coord_store.shelf))
+
+    def get_local_coord_from_target(self, mouse_pos, parent, target, coord_store):
+        '''Recursive function. Moves down through surfaces until target
+        surface'''
+        mouse_pos = coord_sys_map_translation(parent.rect.topleft, mouse_pos)
+        if parent.rect == target.rect and target.rect.collidepoint(mouse_pos):
+            coord_store.change(mouse_pos)
         else:
-            self.screen.click_select(mouse_pos,self.screen.rect,self.selected_list)
+            for item in parent.ui_children:
+                try:
+                    self.get_local_coord_from_target(mouse_pos, item, target, coord_store)
+                except:
+                    print("recusrive function call error")

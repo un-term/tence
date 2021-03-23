@@ -6,34 +6,32 @@ import random
 import unittest
 from unittest.mock import Mock
 
+import game
+import entity_group
 from general_functions import *
-from gui_elements import *
+import gui_elements
 import entity
 
-class TestSurfaces(unittest.TestCase):
+class TestGUI(unittest.TestCase):
 
-    # def test_screen(self):
+    def test_gui(self):
+        pygame.font.init()
+        try: pygame.font.get_init()
+        except: raise Exception("Fonts not initialising")
 
-    #     display = Mock()
-    #     screen = Screen(None,display,(700,700))
-    #     # map = Map(screen,menu_height=40)
+        ent_init_list = [
+            # Baddie((200,400),speed=50.0),
+            entity.Turret((250,250)),
+            entity.Turret((450,250)),
+            entity.Core((350,350)),
+            entity.Turret((250,450)),
+            entity.Turret((450,450))
+        ]
+        entity_group_obj = entity_group.EntityGroup(ent_init_list)
+        state = game.State(entity_group_obj)
 
-    #     if screen:
-    #       result = True
-    #     self.assertTrue(result) 
-
-    def test_map(self):
-
-        display = Mock()
-        screen = Screen(None,display,(700,700))
-        map = Map(screen,menu_height=40)
-        menu = Menu(screen,menu_height=40)
-        menu_box = MenuBox(menu)
-        entity_menu_items = [entity.Core((0,0)),entity.Turret((0,0)),entity.Wall((0,0)),entity.Spawn((0,0))]
-        menu_box.add_menu_entity(entity_menu_items)
-        for item in menu_box.ui_children:
-            print(item.position)
-        # menu = Menu()
+        # entity_group.add_ent(wall_list)
+        gui = gui_elements.GUI(state)
 
         self.assertTrue(True)
 

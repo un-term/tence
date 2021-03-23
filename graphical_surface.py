@@ -48,23 +48,3 @@ class GraphicalSurface(pygame.sprite.Sprite):
         for item in self.ui_children:
             self.surface.blit(item.surface,item.rect)
             item.draw()
-
-    def click_select(self,mouse_pos, parent_rect, selected_list):
-        mouse_pos = coord_sys_map_translation(parent_rect.topleft,mouse_pos)
-        parent_rect = self.rect
-        if self.rect.collidepoint(mouse_pos):
-            if self.selectable: selected_list.append(self.__class__((0,0)))
-            if not selected_list:
-                for item in self.ui_children:
-                    item.click_select(mouse_pos, parent_rect, selected_list)
-
-    def click_placement(self,mouse_pos, parent_rect, selected, target_rect, state):
-        mouse_pos = coord_sys_map_translation(parent_rect.topleft,mouse_pos)
-        parent_rect = self.rect
-        if target_rect.collidepoint(mouse_pos):
-            selected.position = mouse_pos
-            state.entity_group.add_ent([selected])
-        else:
-            for item in self.ui_children:
-                try: item.click_place(mouse_pos, parent_rect, selected, target_rect, state)
-                except: pass     
