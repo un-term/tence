@@ -7,7 +7,7 @@ class EntityGroup:
 
         self.dict = {}
 
-        default_groups = ["all","draw","remove","collision","sound"]
+        default_groups = ["all","draw","remove","collision","sound","camera"]
         self._create_groups_from_list(default_groups)
 
         self.default_add_ent_group = ["all"]
@@ -57,6 +57,10 @@ class EntityGroup:
         for group in group_list:
             for entity in self.dict[group]:
                 entity.kill()
+
+    def empty_this_group_only(self, group):
+        """remove entities in this list of groups from all groups"""
+        self.dict[group].empty()
 
     def link_ent_to_entity_group(self,entity_list):
         for entity in entity_list:

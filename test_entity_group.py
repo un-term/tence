@@ -126,6 +126,26 @@ class TestEntityGroup(unittest.TestCase):
 
         self.assertEqual(2, result)
 
+    def test_empty_group_only(self):
+
+        b1 = Baddie((200,400))
+        b2 = Baddie((220,420))
+        c = Core((100,100))
+        t = Turret((150,150))
+
+        entity_group = EntityGroup([])
+        state = State(entity_group)
+
+        state.entity_group.add_ent([b1,b2,c,t], ["test"])
+
+        before_size = len(state.entity_group.get_group("test"))
+        entity_group.empty_this_group_only("test")
+        after_size = len(state.entity_group.get_group("test"))
+
+        result = before_size - after_size
+
+        self.assertEqual(4, result)
+
 
 if __name__ == '__main__':
     unittest.main()
