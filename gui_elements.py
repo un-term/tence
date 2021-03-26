@@ -124,21 +124,54 @@ class Screen(graphical_surface.GraphicalSurface):
 #         self.rect = self.image.get_rect()
 #         self.rect.bottomright = self.gui.menu_rect.bottomright
 
-class GUI:
-    def __init__(self,state,winsize=(700, 700)):
+class Camera(graphical_surface.GraphicalSurface):
+    def __init__(self, parent, state):
+        graphical_surface.GraphicalSurface.__init__(self, parent)
         self.state = state
+        self.colour = BLACK
+        self.size = None
+        self.surface = None 
+        self.rect = None
+
+    def capture(self):
+        '''Clear group and then add entities that are within collision box'''
+        # self.state.entity_group.rm_ent_from_all_groups(["camera"])
+        self.state.entity_group.empty_this_group_only("camera")
+        for ent in self.state.entity_group.get_group("draw"):
+            if ent.rect.colliderect(self.rect):
+                self.state.entity_group.add_ent([ent], ["camera"])
+        self.ui_children = self.state.entity_group.get_group("camera")
+
+    # def draw(self):
+    #     # self.surface.fill(self.colour)
+    #     for ent in self.state.entity_group.get_group("camera"):
+    #         self.surface.blit(ent.surface, ent.rect)
+
+    def add_entity(self,entity_group):
+        self.ui_children = entity_group
+
+    def add_selection(self, state, selection, local_mouse_pos):
+        selection.position = local_mouse_pos
+        state.entity_group.add_ent([selection])
+
+
+class GUI:
+    def __init__(self, state, winsize=(700, 700)):
+        self.state = state
+        # self.camera = camera
         self.size = winsize
         self.display = pygame.display
+        menu_height = 40
 
         # self.selected_list = []
         self.selection_store = SimpleStore()
         self.ui_elements = {}
 
         # Instantiate surfaces
-        self.ui_elements["screen"] = Screen(None,self.display,self.size)
-        menu_height = 40
-        self.ui_elements["map"] = Map(self.ui_elements["screen"],menu_height)
-        self.ui_elements["map"].add_entity(self.state.entity_group.get_group("draw")) # Add entiies to map surface
+        self.ui_elements["screen"] = Screen(None, self.display, self.size)
+        # Camera setup
+        self.ui_elements["camera"] = Camera(self.ui_elements["screen"], self.state)
+        self.ui_elements["camera"].set_surface_rect((self.size[0], self.size[1] - menu_height), BLACK) # CHANGE this base class method
         self.ui_elements["menu"] = Menu(self.ui_elements["screen"],menu_height)
         self.ui_elements["menu_box"] = MenuBox(self.ui_elements["menu"],menu_height)
         self.ui_elements["selection_box"] = SelectionBox(self.ui_elements["menu"],menu_height,self.selection_store)
@@ -152,31 +185,33 @@ class GUI:
 
     def update(self):
         self.ui_elements["screen"].update_gui() # Recursion
+        pass
 
     def draw(self):
-        """Draws using the coordinate system of the surface being drawn onto"""
+
+        self.ui_elements["camera"].capture()
         self.ui_elements["screen"].draw() # Recursion through depends
+
         self.display.update()
 
     def click(self,mouse_pos):
-
         coord_store = SimpleStore()
+        print(mouse_pos)
         
         screen = self.ui_elements["screen"]
-        map = self.ui_elements["map"]
+        camera = self.ui_elements["camera"]
         menu = self.ui_elements["menu"]
         menu_box = self.ui_elements["menu_box"]
 
         # Selection - placement
-        if map.rect.collidepoint(mouse_pos):
+        if camera.rect.collidepoint(mouse_pos):
             if self.selection_store.shelf:
-                mouse_pos = coord_sys_map_translation(map.rect.topleft, mouse_pos)
-                map.add_selection(self.state, self.selection_store.shelf, mouse_pos)
+                mouse_pos = coord_sys_map_translation(camera.rect.topleft, mouse_pos)
+                camera.add_selection(self.state, self.selection_store.shelf, mouse_pos)
                 self.selection_store.change(None)
 
         # Selection - store
         elif menu.rect.collidepoint(mouse_pos):
-
             self.get_local_coord_from_target(mouse_pos, screen, menu_box, coord_store)
             if coord_store.shelf:
                 self.selection_store.change(menu_box.click(coord_store.shelf))
