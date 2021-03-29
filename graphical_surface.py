@@ -23,9 +23,6 @@ class GraphicalSurface(pygame.sprite.Sprite):
         D_size = vector_subtract(size,self.rect.size)
         self.rect.inflate_ip(D_size)
 
-    def change_position(self,rect_place,coord):
-        rect_place = coord
-
     def _set_surface(self,size):
         return pygame.Surface(size)
 
