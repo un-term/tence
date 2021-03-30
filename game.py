@@ -27,11 +27,13 @@ class Event:
         self.gui = gui
         self.event = pygame.event
         self.selected_entity = None
+        pygame.key.set_repeat(50)  # Allow holding down keys
 
     def check_event(self):
         for event in self.event.get():
             self._check_quit(event)
             self._global_click_check(event) # CHANGE - not dependent on pygame events
+            self._check_arrows(event)
 
     def _check_quit(self,event):
         if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
@@ -41,8 +43,19 @@ class Event:
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
             self.gui.click(mouse_pos)
-        
 
+    def _check_arrows(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_DOWN:
+                self.gui.move_camera("down")
+            elif event.key == pygame.K_UP:
+                self.gui.move_camera("up")
+            elif event.key == pygame.K_RIGHT:
+                self.gui.move_camera("right")
+            elif event.key == pygame.K_LEFT:
+                self.gui.move_camera("left")
+
+        
 class State:
     def __init__(self, entity_group):
         self.game_over = 0
@@ -64,8 +77,9 @@ class State:
     def end_game(self):
         self.game_over = 1
 
+
 class Game:
-    def __init__(self, state, gui=None, event=None,sound=None):
+    def __init__(self, state, gui=None, event=None, sound=None):
         try: self.state = state
         except: raise Exception("state not defined")
         self.gui = gui # screen
@@ -81,7 +95,6 @@ class Game:
           # update all sprites
           #-------------------------------------------------------------
             self.state.entity_group.get_group("all").update()
-            # self.gui.element_group.update()
 
             if self.gui:
                 self.gui.update()
@@ -110,30 +123,30 @@ class Game:
 
     pygame.quit()
 
+
 def main():
 
     pygame.font.init()
     try: pygame.font.get_init()
     except: raise Exception("Fonts not initialising")
 
+    # coordinate system - right +x, down +y
     ent_init_list = [
-        # Baddie((200,400),speed=50.0),
-        Turret((250,250)),
-        Turret((450,250)),
-        Core((350,350)),
-        Turret((250,450)),
-        Turret((450,450))
+        Turret((150,150)),
+        Turret((-150,150)),
+        Core((0,0)),
+        Turret((150,-150)),
+        Turret((-150,-150))
     ]
     entity_group = EntityGroup(ent_init_list)
     state = State(entity_group)
 
     wall = Wall((0,0))
-    point_list = gen_coords_from_range((150,550),(280,550),axis="x",spacing=wall.size[0])
+    point_list = gen_coords_from_range((-200,-200),(200,-200),axis="x",spacing=wall.size[0])
     for point in point_list:
         entity_group.add_ent([Wall(point)])
 
-    # entity_group.add_ent(wall_list)
-    gui = gui_elements.GUI(state)
+    gui = gui_elements.GUI(state, winsize=(1200,700))
     # sound = Sound()
     event = Event(state, gui)
     facdustry = Game(state, gui, event, sound=None)
