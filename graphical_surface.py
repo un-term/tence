@@ -10,6 +10,7 @@ class GraphicalSurface(pygame.sprite.Sprite):
         self.size = None
         self.colour = None
         self.rect = None
+        self.camera_rect = None
         self.surface = None
         self.selectable = False
 

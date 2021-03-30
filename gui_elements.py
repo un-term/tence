@@ -81,24 +81,6 @@ class Menu(graphical_surface.GraphicalSurface):
         self.rect.topleft = (0,self.ui_parent.size[1] - self.menu_height) # relative to parent
 
 
-class Map(graphical_surface.GraphicalSurface):
-    def __init__(self,parent,menu_height):
-        graphical_surface.GraphicalSurface.__init__(self,parent)
-
-        self.menu_height = menu_height
-        self.colour = BLACK
-        self.size = (self.ui_parent.size[0],self.ui_parent.size[1] - self.menu_height)
-        self.set_surface_rect(self.size,self.colour)
-        self.rect.topleft = self.ui_parent.rect.topleft # relative to parent
-
-    def add_entity(self,entity_group):
-        self.ui_children = entity_group
-
-    def add_selection(self, state, selection, local_mouse_pos):
-        selection.position = local_mouse_pos
-        state.entity_group.add_ent([selection])
-
-
 class Screen(graphical_surface.GraphicalSurface):
     def __init__(self,parent,display,size):
         graphical_surface.GraphicalSurface.__init__(self,parent)
@@ -125,29 +107,53 @@ class Screen(graphical_surface.GraphicalSurface):
 #         self.rect.bottomright = self.gui.menu_rect.bottomright
 
 class Camera(graphical_surface.GraphicalSurface):
-    def __init__(self, parent, state):
+    '''Straddling both coordinate systems'''
+    def __init__(self, parent, state, size):
         graphical_surface.GraphicalSurface.__init__(self, parent)
         self.state = state
         self.colour = BLACK
-        self.size = None
-        self.surface = None 
+        self.size = size
+        self.surface = None
         self.rect = None
+        # Coordinate systems
+        self.map_rect = None
+        # self.camera_rect = None
+
+    def specific_setup(self, camera_map_center):
+        '''Does not use base class methods'''
+        self.surface = pygame.Surface(self.size)
+        self.surface.fill(self.colour)
+        # map coordinatey system
+        self.map_rect = pygame.Rect((0,0), self.size)
+        self.map_rect.center = camera_map_center
+        # screen coordinate system
+        self.rect = pygame.Rect((0,0), self.size)
 
     def capture(self):
-        '''Clear group and then add entities that are within collision box'''
-        # self.state.entity_group.rm_ent_from_all_groups(["camera"])
-        self.state.entity_group.empty_this_group_only("camera")
+        '''Clear children and then add entities that are within collision box'''
+        ''' CHANGE - check if camera position has changed'''
+        self.ui_children.clear()
         for ent in self.state.entity_group.get_group("draw"):
-            if ent.rect.colliderect(self.rect):
-                self.state.entity_group.add_ent([ent], ["camera"])
-        self.ui_children = self.state.entity_group.get_group("camera")
+            if ent.rect.colliderect(self.map_rect):
+                ent.camera_rect = ent.rect.copy()
+                ent.camera_rect.center = self.translate_map_vector_to_camera_vector(ent.rect.center)
+                self.ui_children.append(ent)
 
-    # def draw(self):
-    #     # self.surface.fill(self.colour)
-    #     for ent in self.state.entity_group.get_group("camera"):
-    #         self.surface.blit(ent.surface, ent.rect)
+    def translate_map_vector_to_camera_vector(self, map_V):
+        '''map vectors from map origin (x,y)
+           camera vectors from top left corner (x,-y)'''
+        return vector_subtract(map_V, self.map_rect.topleft)
 
-    def add_entity(self,entity_group):
+    def translate_camera_vector_to_map_vector(self, camera_V):
+        return vector_add(camera_V, self.map_rect.topleft)
+
+    def draw(self):
+        '''Overloading base class draw method'''
+        self.surface.fill(self.colour)
+        for ent in self.ui_children:
+            self.surface.blit(ent.surface, ent.camera_rect)
+
+    def add_entity(self, entity_group):
         self.ui_children = entity_group
 
     def add_selection(self, state, selection, local_mouse_pos):
@@ -170,8 +176,10 @@ class GUI:
         # Instantiate surfaces
         self.ui_elements["screen"] = Screen(None, self.display, self.size)
         # Camera setup
-        self.ui_elements["camera"] = Camera(self.ui_elements["screen"], self.state)
-        self.ui_elements["camera"].set_surface_rect((self.size[0], self.size[1] - menu_height), BLACK) # CHANGE this base class method
+        camera_size = (self.size[0], self.size[1] - menu_height)
+        self.ui_elements["camera"] = Camera(self.ui_elements["screen"], self.state, camera_size)
+        self.ui_elements["camera"].specific_setup((100,100))  # Center camera around origin
+
         self.ui_elements["menu"] = Menu(self.ui_elements["screen"],menu_height)
         self.ui_elements["menu_box"] = MenuBox(self.ui_elements["menu"],menu_height)
         self.ui_elements["selection_box"] = SelectionBox(self.ui_elements["menu"],menu_height,self.selection_store)
@@ -184,20 +192,20 @@ class GUI:
                 item.ui_parent.ui_children.append(item)
 
     def update(self):
-        self.ui_elements["screen"].update_gui() # Recursion
+        self.ui_elements["screen"].update_gui()  # Recursion
         pass
 
     def draw(self):
 
         self.ui_elements["camera"].capture()
-        self.ui_elements["screen"].draw() # Recursion through depends
+        self.ui_elements["screen"].draw()  # Recursion through depends
 
         self.display.update()
 
     def click(self,mouse_pos):
         coord_store = SimpleStore()
         print(mouse_pos)
-        
+
         screen = self.ui_elements["screen"]
         camera = self.ui_elements["camera"]
         menu = self.ui_elements["menu"]
@@ -206,7 +214,8 @@ class GUI:
         # Selection - placement
         if camera.rect.collidepoint(mouse_pos):
             if self.selection_store.shelf:
-                mouse_pos = coord_sys_map_translation(camera.rect.topleft, mouse_pos)
+                mouse_pos = camera.translate_camera_vector_to_map_vector(mouse_pos)
+                # mouse_pos = coord_sys_map_translation(camera.rect.topleft, mouse_pos)
                 camera.add_selection(self.state, self.selection_store.shelf, mouse_pos)
                 self.selection_store.change(None)
 
@@ -228,3 +237,13 @@ class GUI:
                     self.get_local_coord_from_target(mouse_pos, item, target, coord_store)
                 except:
                     print("recusrive function call error")
+
+    def move_camera(self, direction):
+        if direction == "down":
+            self.ui_elements["camera"].map_rect.center = vector_add(self.ui_elements["camera"].map_rect.center, (0,10))
+        elif direction == "up":
+            self.ui_elements["camera"].map_rect.center = vector_add(self.ui_elements["camera"].map_rect.center, (0,-10))
+        elif direction == "right":
+            self.ui_elements["camera"].map_rect.center = vector_add(self.ui_elements["camera"].map_rect.center, (10,0))
+        elif direction == "left":
+            self.ui_elements["camera"].map_rect.center = vector_add(self.ui_elements["camera"].map_rect.center, (-10,0))

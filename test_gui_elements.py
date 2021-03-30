@@ -35,6 +35,21 @@ class TestGUI(unittest.TestCase):
 
         self.assertTrue(True)
 
+    def test_camera(self):
+        parent = Mock()
+        size = (10,10)
+        ent_init_list = [ entity.Turret((5,5)) ]
+        entity_group_obj = entity_group.EntityGroup(ent_init_list)
+        state = game.State(entity_group_obj)
+
+        camera = gui_elements.Camera(parent, state, size)
+        camera.specific_setup((0,0))
+
+        print("camera top left: ",camera.map_rect.topleft)
+        camera.capture()
+        print(camera.ui_children[0].camera_rect.center)
+        
+        self.assertTrue(True)
 
 if __name__ == '__main__':
     unittest.main()
