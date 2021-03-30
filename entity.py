@@ -41,6 +41,21 @@ def find_closest_entity(ref_entity,entity_list):
             pass
     return closest_entity
 
+
+class EntityFactory():
+    def __init__(self):
+        self.dict = {
+        "turret" : Turret,
+        "baddie" : Baddie,
+        "wall" : Wall,
+        "core" : Core,
+        "spawn" : Spawn
+        }
+
+    def get_entity_class(self,name):
+        return self.dict[name]
+
+
 class Entity(graphical_surface.GraphicalSurface):
     def __init__(self,parent=None):
         graphical_surface.GraphicalSurface.__init__(self,parent)
