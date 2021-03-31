@@ -274,8 +274,10 @@ class Core(Entity):
     def _check_health(self):
         if self.health < 10:
             self.colour = RED
+            self.set_surface_rect(self.size,self.colour)
         elif self.health < 20:
             self.colour = YELLOW
+            self.set_surface_rect(self.size,self.colour)
 
 
 class Wall(Entity):
