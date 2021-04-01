@@ -108,16 +108,16 @@ def coord_sys_map_translation(offset, V_g):
     """mapping global (g) to local (l)"""
     return vector_subtract(V_g,offset)
 
-def sort_vector_small_big(V1,V2,axis):
+def sort_vector_small_big(V1,V2):
     """return smaller and then bigger vector along specified axis"""
-    if axis == "x" and V1[1]==V2[1]:
+    if V1[1]==V2[1]:
         if V1[0] < V2[0]:
             return V1,V2
         elif V1[0] > V2[0]:
             return V2,V1
         elif V1[0] == V2[0]:
             return V1,V2
-    elif axis == "y" and V1[0]==V2[0]:
+    elif V1[0]==V2[0]:
         if V1[1] < V2[1]:
             return V1,V2
         elif V1[1] > V2[1]:
@@ -127,16 +127,25 @@ def sort_vector_small_big(V1,V2,axis):
     else:
         raise Exception("Start and End coordinates are not on the required axis")
 
-def gen_coords_from_range(start,end,axis,spacing):
+def snap_to_nearest_axis(start, end):
+    diff_V = vector_abs(vector_subtract(start,end))
+    if diff_V[0] < diff_V[1]:
+        new_end = (start[0],end[1])
+    else:
+        new_end = (end[0],start[1])
+    return new_end 
+
+def gen_coords_from_range(start, end, spacing):
     """note: points created from and on start. 
             non-whole end spacings ignored"""
-    (start,end) = sort_vector_small_big(start,end,axis)
+    end = snap_to_nearest_axis(start, end)
+    (start,end) = sort_vector_small_big(start,end)
     point_list = []
-    if axis == "x" and start[1]==end[1]:
+    if start[1]==end[1]:
         y_const = start[1]
         for i in range(start[0],end[0],spacing):
             point_list.append((i,y_const))
-    elif axis == "y" and start[0]==end[0]:
+    elif start[0]==end[0]:
         x_const = start[0]
         for i in range(start[1],end[1],spacing):
             point_list.append((x_const,i))
