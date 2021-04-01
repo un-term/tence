@@ -171,6 +171,7 @@ class GUI:
 
         # self.selected_list = []
         self.selection_store = SimpleStore()
+        self.start_wall_V = None
         self.ui_elements = {}
 
         # Instantiate surfaces
@@ -214,10 +215,25 @@ class GUI:
         # Selection - placement
         if camera.rect.collidepoint(mouse_pos):
             if self.selection_store.shelf:
-                mouse_pos = camera.translate_camera_vector_to_map_vector(mouse_pos)
-                # mouse_pos = coord_sys_map_translation(camera.rect.topleft, mouse_pos)
-                camera.add_selection(self.state, self.selection_store.shelf, mouse_pos)
-                self.selection_store.change(None)
+                if self.selection_store.shelf.type == "wall":
+                    if not self.start_wall_V:
+                        self.start_wall_V = camera.translate_camera_vector_to_map_vector(mouse_pos)
+                    else:
+                        wall = entity.Wall((0,0))
+                        end_wall_V = camera.translate_camera_vector_to_map_vector(mouse_pos)
+                        print(self.start_wall_V, end_wall_V)
+                        point_list = gen_coords_from_range(self.start_wall_V,end_wall_V,spacing=wall.size[0])
+                        for point in point_list:
+                            self.state.entity_group.add_ent([entity.Wall(point)])
+                        self.selection_store.change(None)
+                        self.start_wall_V = None
+
+                else:
+                    mouse_pos = camera.translate_camera_vector_to_map_vector(mouse_pos)
+                    # mouse_pos = coord_sys_map_translation(camera.rect.topleft, mouse_pos)
+                    camera.add_selection(self.state, self.selection_store.shelf, mouse_pos)
+                    self.selection_store.change(None)
+
 
         # Selection - store
         elif menu.rect.collidepoint(mouse_pos):
