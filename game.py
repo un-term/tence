@@ -36,7 +36,6 @@ class Event:
             self._check_quit(event)
             self._global_click_check(event) # CHANGE - not dependent on pygame events
             self._check_arrows(event)
-            self._check_shift_click(event)
 
     def _check_quit(self,event):
         if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
@@ -57,11 +56,6 @@ class Event:
                 self.gui.move_camera("right")
             elif event.key == pygame.K_LEFT:
                 self.gui.move_camera("left")
-
-    def _check_shift_click(self, event):
-        if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
-            if event.mod & pygame.KMOD_LSHIFT:
-                if pygame.MOUSEBUTTONDOWN:
 
         
 class State:
