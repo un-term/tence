@@ -31,7 +31,10 @@ class GraphicalSurface(pygame.sprite.Sprite):
         surface.fill(colour)
         
     def _set_rect(self,size):
-        return pygame.Rect((0,0),size)
+        if self.rect:
+            return pygame.Rect(self.rect.topleft, size)
+        else:
+            return pygame.Rect((0,0), size)
 
     def update(self):
         pass
