@@ -87,17 +87,23 @@ class TestGeneralFunctions(unittest.TestCase):
         self.assertLess(result[0][1],result[1][1])
 
     def test_gen_coords_from_range(self):
-        start=(10,29)
-        end=(10,10)
-        points = gen_coords_from_range(start,end,axis="y",spacing=3)
+        start=(5,7)
+        end=(21,11)
+        points = gen_coords_from_range(start,end,spacing=3)
         result = len(points)
-        self.assertEqual(6+1,result)
+        self.assertEqual(5+1,result)
 
     def test_find_closest_vector(self):
         vectors = [(1,1),(-2,3),(4,4),(10,20)]
         ref_vector = (-3.4,5)
         result = find_closest_vector(ref_vector,vectors)
         self.assertEqual(vectors[1],result)
+
+    def test_snap_to_nearest_axis(self):
+        start = (5,5)
+        end = (6,20)
+        new_end = snap_to_nearest_axis(start, end)
+        self.assertEqual((5,20),new_end)
 
  
 if __name__ == '__main__':
