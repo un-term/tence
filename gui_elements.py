@@ -90,7 +90,7 @@ class Screen(graphical_surface.GraphicalSurface):
         self.set_surface_rect(self.size,self.colour)
         self.surface = display.set_mode(size) # Overwrite surface
 
-        
+
 # CHANGE - not updated and won't work
 # class KillCount(pygame.sprite.Sprite):
 #     def __init__(self,gui):

@@ -109,6 +109,7 @@ class Turret(Entity):
         self.radius = 100 # shoot range - circle collision detection
         self.ammo = 5
         self.damage = 1
+        self.health = 10
         self.reload_time = 0.2
         self.shoot_timestamp = 0
 
@@ -121,9 +122,11 @@ class Turret(Entity):
                 self._shoot(hit_list[0],self.entity_group.state.total_time) # shoot first baddie in list only
                 laser = LineSprite(RED, self.position, hit_list[0].position)
                 self.entity_group.add_ent([laser],["draw","remove"])
+            self._check_dead()
 
     def collision(self,ent):
         if ent.type == "baddie":
+            self.take_damage(ent.damage)
             ent.take_damage(ent.health)
 
     def _reloading(self,total_time):
@@ -151,9 +154,12 @@ class Turret(Entity):
             target.take_damage(self.damage)
             self.shoot_timestamp = total_time
 
-        # print("shooting!!!")
-        # self.entity_group.add_ent([self],["sound"])
-        # self.game.sound.laser_sound.play()
+    def _check_dead(self):
+        if self.health <= 0:
+            self.entity_group.add_ent([self],["remove"])
+
+    def take_damage(self, damage):
+        self.health -= damage
 
 
 class Baddie(Entity):
@@ -228,7 +234,7 @@ class Baddie(Entity):
     def take_damage(self,damage):
         self.health -= damage
     
-    def _do_damage(self,target,damage):
+    def do_damage(self,target,damage):
         target.health -= damage
     
     def _check_dead(self):
@@ -260,10 +266,12 @@ class Core(Entity):
 
     def collision(self, ent):
         if ent.type == "baddie":
-            ent._do_damage(self,ent.damage)
+            self.take_damage(ent.damage)
+            # ent.health(self,ent.damage)
             ent.health = 0
-        else:
-            pass
+
+    def take_damage(self, damage):
+        self.health -= damage
 
     def _check_dead(self):
         """CHANGE - adding entities to game_over group to avoid having to know game object"""
