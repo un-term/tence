@@ -142,6 +142,11 @@ class TestEntity(unittest.TestCase):
 
         self.assertEqual(ent_list[1], result)
 
+    def test_entity_type(self):
+        turret = Turret((0,0))
+        result = turret.type
+        self.assertEqual("turret", result)
+
 
 
 if __name__ == '__main__':

@@ -13,6 +13,7 @@ class GraphicalSurface(pygame.sprite.Sprite):
         self.camera_rect = None
         self.surface = None
         self.selectable = False
+        self.type = self.__class__.__name__.lower()
 
     def set_surface_rect(self,size,colour):
         self.surface = self._set_surface(size)

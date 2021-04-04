@@ -74,8 +74,6 @@ class LineSprite(Entity):
     def __init__(self,colour, start, end):
         # def __init__(self):
         Entity.__init__(self)
-        self.type = "laser"
-
         self.size = vector_abs(vector_subtract(start,end))
         self.colour = BLACK
         self.set_surface_rect(self.size,self.colour)
@@ -99,8 +97,6 @@ class LineSprite(Entity):
 class Turret(Entity):
     def __init__(self,position):
         Entity.__init__(self)
-        self.type = "turret"
-
         self.size = (30,30)
         self.colour = DEEPSKYBLUE
         self.set_surface_rect(self.size,self.colour)
@@ -165,8 +161,6 @@ class Turret(Entity):
 class Baddie(Entity):
     def __init__(self, position,speed=30.0):
         Entity.__init__(self)
-        self.type = "baddie"
-
         self.size = (10,10)
         self.colour = RED
         self.set_surface_rect(self.size,self.colour)
@@ -250,8 +244,6 @@ class Core(Entity):
     # Constructor
     def __init__(self,position):
         Entity.__init__(self)
-        self.type = "core"
-
         self.size = (50,50)
         self.colour = GREEN
         self.set_surface_rect(self.size,self.colour)
@@ -267,7 +259,7 @@ class Core(Entity):
     def collision(self, ent):
         if ent.type == "baddie":
             self.take_damage(ent.damage)
-            # ent.health(self,ent.damage)
+           # ent.health(self,ent.damage)
             ent.health = 0
 
     def take_damage(self, damage):
@@ -291,8 +283,6 @@ class Core(Entity):
 class Wall(Entity):
     def __init__(self,position):
         Entity.__init__(self)
-        self.type = "wall"
-
         self.size = (10,10)
         self.colour = YELLOW
         self.set_surface_rect(self.size,self.colour)
@@ -329,7 +319,6 @@ class Spawn(Entity):
     """Produces Baddie entities on Spawn position"""
     def __init__(self,position):
         Entity.__init__(self)
-        self.type = "spawn"
 
         self.size = (20,20)
         self.colour = ORANGE
