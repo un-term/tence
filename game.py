@@ -36,6 +36,7 @@ class Event:
             self._check_quit(event)
             self._global_click_check(event) # CHANGE - not dependent on pygame events
             self._check_arrows(event)
+            self._check_plus_minus(event)
 
     def _check_quit(self,event):
         if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE):
@@ -56,6 +57,14 @@ class Event:
                 self.gui.move_camera("right")
             elif event.key == pygame.K_LEFT:
                 self.gui.move_camera("left")
+
+    def _check_plus_minus(self, event):
+        factor = 0.1
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_EQUALS:
+                self.gui.zoom_camera(factor)
+            elif event.key == pygame.K_MINUS:
+                self.gui.zoom_camera(factor*-1.0)
 
         
 class State:
