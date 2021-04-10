@@ -113,31 +113,80 @@ class Camera(graphical_surface.GraphicalSurface):
         self.state = state
         self.colour = BLACK
         self.size = size
+        self.map_size = self.size
         self.surface = None
         self.rect = None
-        # Coordinate systems
+        # map coordinatey system
         self.map_rect = None
         # self.camera_rect = None
+        self.zoom_level = 1
 
     def specific_setup(self, camera_map_center):
         '''Does not use base class methods'''
         self.surface = pygame.Surface(self.size)
         self.surface.fill(self.colour)
-        # map coordinatey system
-        self.map_rect = pygame.Rect((0,0), self.size)
+        self.map_rect = pygame.Rect((0,0), self.map_size)
         self.map_rect.center = camera_map_center
         # screen coordinate system
         self.rect = pygame.Rect((0,0), self.size)
 
-    def capture(self):
-        '''Clear children and then add entities that are within collision box'''
-        ''' CHANGE - check if camera position has changed'''
-        self.ui_children.clear()
+    def change_size(self, new_size):
+        '''Change camera map size'''
+        self.surface = pygame.transform.smoothscale(self.surface, new_size)
+        # Keep camera centered on current position
+        center = self.map_rect.center
+        D_size = vector_subtract(new_size, self.map_rect.size)
+        self.map_rect.inflate_ip(D_size)
+        self.map_rect.center = center
+        
+    def draw(self):
+        '''Overloading base class draw method
+        Copies entity surface and rects for drawing'''
+        map_ents = self.map_capture()
+        camera_surface_rect = self.convert_map_ents_to_camera(map_ents)
+        self.surface.fill(self.colour)
+        for surf_rect in camera_surface_rect:  # tuple
+            self.surface.blit(surf_rect[0], surf_rect[1])
+
+    def map_capture(self):
+        # Scale map rect for camera
+        # new_size = vector_scalar_mult(self.map_rect.size, self.zoom_level)
+        # self.change_size(vector_convert_to_integer(new_size))
+        # temporarily change map_rect to new zoom size
+        # zoom in descrease rect size
+        map_ents = []
         for ent in self.state.entity_group.get_group("draw"):
             if ent.rect.colliderect(self.map_rect):
-                ent.camera_rect = ent.rect.copy()
-                ent.camera_rect.center = self.translate_map_vector_to_camera_vector(ent.rect.center)
-                self.ui_children.append(ent)
+                map_ents.append(ent)
+        return map_ents
+
+    def convert_map_ents_to_camera(self, map_ents):
+        '''Camera movement and zoom'''
+        camera_surface_rect = []
+        for ent in map_ents:
+            ent_colour = ent.colour
+            ent_position = ent.position
+            # ent_rect_center = ent.rect.center
+            ent_size = ent.size
+            # ent_rect = ent.rect.copy()
+            
+            # zoom to centre of camera
+            ent_position = vector_subtract(ent_position, self.map_rect.center)
+
+            ent_size = vector_scalar_mult(ent_size, self.zoom_level)
+            ent_rect = pygame.Rect((0,0), ent_size)
+            ent_position = vector_scalar_mult(ent_position, self.zoom_level)
+
+            ent_surface =  pygame.Surface(ent_size)
+            ent_surface.fill(ent_colour)
+
+
+            ent_position = self.translate_map_vector_to_camera_vector(ent_position)
+
+            ent_rect.center = ent_position
+            camera_surface_rect.append((ent_surface, ent_rect))
+        # self.zoom_level = 1
+        return camera_surface_rect
 
     def translate_map_vector_to_camera_vector(self, map_V):
         '''map vectors from map origin (x,y)
@@ -147,18 +196,16 @@ class Camera(graphical_surface.GraphicalSurface):
     def translate_camera_vector_to_map_vector(self, camera_V):
         return vector_add(camera_V, self.map_rect.topleft)
 
-    def draw(self):
-        '''Overloading base class draw method'''
-        self.surface.fill(self.colour)
-        for ent in self.ui_children:
-            self.surface.blit(ent.surface, ent.camera_rect)
-
-    def add_entity(self, entity_group):
-        self.ui_children = entity_group
-
     def add_selection(self, state, selection, local_mouse_pos):
         selection.position = local_mouse_pos
         state.entity_group.add_ent([selection])
+
+    def move(self, movement):
+        self.map_rect.move_ip(movement)
+
+    def zoom(self, factor):
+        self.zoom_level_change = factor
+
 
 
 class GUI:
@@ -172,14 +219,14 @@ class GUI:
         # self.selected_list = []
         self.selection_store = SimpleStore()
         self.start_wall_V = None
-        self.ui_elements = {}
+        self.ui_elements = {} # > python 3.7 dict ordering from order added
 
         # Instantiate surfaces
         self.ui_elements["screen"] = Screen(None, self.display, self.size)
         # Camera setup
         camera_size = (self.size[0], self.size[1] - menu_height)
         self.ui_elements["camera"] = Camera(self.ui_elements["screen"], self.state, camera_size)
-        self.ui_elements["camera"].specific_setup((100,100))  # Center camera around origin
+        self.ui_elements["camera"].specific_setup((0,0))  # Center camera around origin
 
         self.ui_elements["menu"] = Menu(self.ui_elements["screen"],menu_height)
         self.ui_elements["menu_box"] = MenuBox(self.ui_elements["menu"],menu_height)
@@ -197,10 +244,8 @@ class GUI:
         pass
 
     def draw(self):
-
-        self.ui_elements["camera"].capture()
-        self.ui_elements["screen"].draw()  # Recursion through depends
-
+        for item in self.ui_elements.values():
+            item.draw()
         self.display.update()
 
     def click(self,mouse_pos):
@@ -254,12 +299,9 @@ class GUI:
                 except:
                     print("recusrive function call error")
 
-    def move_camera(self, direction):
-        if direction == "down":
-            self.ui_elements["camera"].map_rect.center = vector_add(self.ui_elements["camera"].map_rect.center, (0,10))
-        elif direction == "up":
-            self.ui_elements["camera"].map_rect.center = vector_add(self.ui_elements["camera"].map_rect.center, (0,-10))
-        elif direction == "right":
-            self.ui_elements["camera"].map_rect.center = vector_add(self.ui_elements["camera"].map_rect.center, (10,0))
-        elif direction == "left":
-            self.ui_elements["camera"].map_rect.center = vector_add(self.ui_elements["camera"].map_rect.center, (-10,0))
+    def move_camera(self, movement):
+        self.ui_elements["camera"].move(movement)
+
+    def zoom_camera(self, factor):
+        self.ui_elements["camera"].zoom_level -= factor
+
