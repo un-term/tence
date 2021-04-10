@@ -48,15 +48,16 @@ class Event:
             self.gui.click(mouse_pos)
 
     def _check_arrows(self, event):
+        jump = 10
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_DOWN:
-                self.gui.move_camera("down")
+                self.gui.move_camera((0,jump))
             elif event.key == pygame.K_UP:
-                self.gui.move_camera("up")
+                self.gui.move_camera((0,-1.0*jump))
             elif event.key == pygame.K_RIGHT:
-                self.gui.move_camera("right")
+                self.gui.move_camera((jump,0))
             elif event.key == pygame.K_LEFT:
-                self.gui.move_camera("left")
+                self.gui.move_camera((-1.0*jump,0))
 
     def _check_plus_minus(self, event):
         factor = 0.1
