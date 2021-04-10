@@ -162,3 +162,7 @@ def find_closest_vector(ref_vector,list_of_vectors):
             else:
                 pass
         return closest_vector
+
+def vector_convert_to_integer(V):
+    '''Round to nearest integer first'''
+    return (int(round(V[0],0)) ,int(round(V[1],0)))
