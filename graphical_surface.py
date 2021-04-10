@@ -49,4 +49,4 @@ class GraphicalSurface(pygame.sprite.Sprite):
             self.surface.fill(self.colour)
         for item in self.ui_children:
             self.surface.blit(item.surface,item.rect)
-            item.draw()
+            # item.draw()
