@@ -83,7 +83,7 @@ class TestGeneralFunctions(unittest.TestCase):
         self.assertEqual((118.6,256.0), result)
 
     def test_sort_vector_small_big(self):
-        result = sort_vector_small_big((20,4),(20,1),axis="y")
+        result = sort_vector_small_big((20,4),(20,1))
         self.assertLess(result[0][1],result[1][1])
 
     def test_gen_coords_from_range(self):
@@ -104,6 +104,10 @@ class TestGeneralFunctions(unittest.TestCase):
         end = (6,20)
         new_end = snap_to_nearest_axis(start, end)
         self.assertEqual((5,20),new_end)
+
+    def test_vector_convert_to_integer(self):
+        result = vector_convert_to_integer((17.7,12.2))
+        self.assertEqual((18,12),result)
 
  
 if __name__ == '__main__':
