@@ -70,13 +70,14 @@ class LineSprite(Entity):
     def __init__(self,colour, start, end):
         # def __init__(self):
         Entity.__init__(self)
-        self.size = vector_abs(vector_subtract(start,end))
-        self.colour = BLACK
-        self.set_surface_rect(self.size,self.colour)
+        size = vector_abs(vector_subtract(start,end))
+        colour = BLACK
+        self.create_surface_and_rect(size, colour)
         self.surface.set_colorkey(BLACK)
 
         center = vector_vector_midpoint(end,start)
-        self.rect.center = center
+        # self.rect.center = center
+        self.position = center
         # pygame.draw.aaline(self.surface,self.colour,start,end)
         local_start = coord_sys_map_translation(self.rect.topleft, start)
         local_end = coord_sys_map_translation(self.rect.topleft, end)
@@ -91,11 +92,11 @@ class LineSprite(Entity):
 
 
 class Turret(Entity):
-    def __init__(self,position):
+    def __init__(self, position):
         Entity.__init__(self)
-        self.size = (30,30)
-        self.colour = DEEPSKYBLUE
-        self.set_surface_rect(self.size,self.colour)
+        size = (30,30)
+        colour = DEEPSKYBLUE
+        self.create_surface_and_rect(size, colour)
         self.position = position
     
         self.radius = 100 # shoot range - circle collision detection
@@ -157,9 +158,9 @@ class Turret(Entity):
 class Baddie(Entity):
     def __init__(self, position,speed=30.0):
         Entity.__init__(self)
-        self.size = (10,10)
-        self.colour = RED
-        self.set_surface_rect(self.size,self.colour)
+        size = (10,10)
+        colour = RED
+        self.create_surface_and_rect(size, colour)
         self.position = position
 
         self.health = 2
@@ -240,9 +241,9 @@ class Core(Entity):
     # Constructor
     def __init__(self,position):
         Entity.__init__(self)
-        self.size = (50,50)
-        self.colour = GREEN
-        self.set_surface_rect(self.size,self.colour)
+        size = (50,50)
+        colour = GREEN
+        self.create_surface_and_rect(size, colour)
         self.position = position
 
         self.radius = 25 # shoot range - circle collision detection
@@ -269,19 +270,17 @@ class Core(Entity):
 
     def _check_health(self):
         if self.health < 10:
-            self.colour = RED
-            self.set_surface_rect(self.size,self.colour)
+            self.change_colour(RED)
         elif self.health < 20:
-            self.colour = YELLOW
-            self.set_surface_rect(self.size,self.colour)
+            self.change_colour(YELLOW)
 
 
 class Wall(Entity):
     def __init__(self,position):
         Entity.__init__(self)
-        self.size = (10,10)
-        self.colour = YELLOW
-        self.set_surface_rect(self.size,self.colour)
+        size = (10,10)
+        colour = YELLOW
+        self.create_surface_and_rect(size, colour)
         self.position = position
         
 
@@ -315,10 +314,9 @@ class Spawn(Entity):
     """Produces Baddie entities on Spawn position"""
     def __init__(self,position):
         Entity.__init__(self)
-
-        self.size = (20,20)
-        self.colour = ORANGE
-        self.set_surface_rect(self.size,self.colour)
+        size = (20,20)
+        colour = ORANGE
+        self.create_surface_and_rect(size, colour)
         self.position = position
 
         self.baddie_count = 0

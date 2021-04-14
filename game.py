@@ -48,7 +48,7 @@ class Event:
             self.gui.click(mouse_pos)
 
     def _check_arrows(self, event):
-        jump = 10
+        jump = 20
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_DOWN:
                 self.gui.move_camera((0,jump))
@@ -153,7 +153,7 @@ def main():
     entity_group = EntityGroup(ent_init_list)
     state = State(entity_group)
 
-    gui = gui_elements.GUI(state, winsize=(1200,700))
+    gui = gui_elements.GUI(pygame.display, state, camera_size=(700,700))
     # sound = Sound()
     event = Event(state, gui)
     facdustry = Game(state, gui, event, sound=None)

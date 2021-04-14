@@ -5,6 +5,13 @@ from general_functions import *
 import entity
 import graphical_surface
 
+def resize_rect_and_surface(rect, surface, size):
+    center = rect.center
+    rect = pygame.Rect((0,0), size)
+    rect.center = center
+    surface = pygame.transform.scale(surface, size)
+    return rect, surface
+
 
 class SimpleStore:
     def __init__(self):
@@ -19,8 +26,8 @@ class SelectionBox(graphical_surface.GraphicalSurface):
         graphical_surface.GraphicalSurface.__init__(self,parent)
         
         self.colour = BLACK
-        self.size = (menu_height, menu_height)
-        self.set_surface_rect(self.size, self.colour)
+        size = (menu_height, menu_height)
+        self.create_surface_and_rect(size, self.colour)
         self.rect.topright = (self.ui_parent.rect.topright[0], 0) # relative to parent
         self.store_surface = self.surface
 
@@ -29,7 +36,7 @@ class SelectionBox(graphical_surface.GraphicalSurface):
     def update_gui(self):
         if self.selection_store.shelf:
             self.surface = self.selection_store.shelf.surface.copy()
-            self.change_size(self.size)
+            self.surface = pygame.transform.scale(self.surface, self.rect.size)  # fit surface to rect
         else:
             self.surface = self.store_surface 
 
@@ -42,8 +49,8 @@ class MenuBox(graphical_surface.GraphicalSurface):
         graphical_surface.GraphicalSurface.__init__(self,parent)
 
         self.colour = GREY
-        self.size = (self.ui_parent.size[0]-menu_height,self.ui_parent.size[1])
-        self.set_surface_rect(self.size,self.colour)
+        size = (self.ui_parent.rect.size[0]-menu_height,self.ui_parent.rect.size[1])
+        self.create_surface_and_rect(size, self.colour)
         self.rect.topleft = (0,0) # relative to parent
 
         self.menu_entity_offset = 5
@@ -53,8 +60,8 @@ class MenuBox(graphical_surface.GraphicalSurface):
         for count, item in enumerate(entity_menu_items):
             dist = self.menu_item_size[0] + self.menu_entity_offset
             coord_x = dist * (count+1) - 0.5*self.menu_item_size[0]
-            item.position = (coord_x,self.rect.center[1])
-            item.change_size(self.menu_item_size)
+            item.rect, item.surface = resize_rect_and_surface(item.rect, item.surface, self.menu_item_size)
+            item.position = (coord_x, self.rect.center[1])
             item.selectable = True
 
             self.ui_children.append(item)
@@ -76,9 +83,9 @@ class Menu(graphical_surface.GraphicalSurface):
 
         self.menu_height = menu_height
         self.colour = BLACK
-        self.size = (self.ui_parent.size[0],self.menu_height)
-        self.set_surface_rect(self.size,self.colour)
-        self.rect.topleft = (0,self.ui_parent.size[1] - self.menu_height) # relative to parent
+        size = (self.ui_parent.rect.size[0],self.menu_height)
+        self.create_surface_and_rect(size, self.colour)
+        self.rect.topleft = (0,self.ui_parent.rect.size[1] - self.menu_height) # relative to parent
 
 
 class Screen(graphical_surface.GraphicalSurface):
@@ -86,9 +93,8 @@ class Screen(graphical_surface.GraphicalSurface):
         graphical_surface.GraphicalSurface.__init__(self,parent)
 
         self.colour = BLACK
-        self.size = size
-        self.set_surface_rect(self.size,self.colour)
-        self.surface = display.set_mode(size) # Overwrite surface
+        self.create_surface_and_rect(size, self.colour)
+        self.surface = display.set_mode(size)
 
 
 # CHANGE - not updated and won't work
@@ -116,6 +122,7 @@ class Camera(graphical_surface.GraphicalSurface):
         self.map_size = self.size
         self.surface = None
         self.rect = None
+        self.draw_list = []
         # map coordinatey system
         self.map_rect = None
         # self.camera_rect = None
@@ -132,7 +139,7 @@ class Camera(graphical_surface.GraphicalSurface):
 
     def change_size(self, new_size):
         '''Change camera map size'''
-        self.surface = pygame.transform.smoothscale(self.surface, new_size)
+        self.surface = pygame.transform.scale(self.surface, new_size)
         # Keep camera centered on current position
         center = self.map_rect.center
         D_size = vector_subtract(new_size, self.map_rect.size)
@@ -142,59 +149,66 @@ class Camera(graphical_surface.GraphicalSurface):
     def draw(self):
         '''Overloading base class draw method
         Copies entity surface and rects for drawing'''
+        self.draw_list.clear()
         map_ents = self.map_capture()
-        camera_surface_rect = self.convert_map_ents_to_camera(map_ents)
+        self.draw_list.extend(self.convert_map_ents_to_camera(map_ents))
         self.surface.fill(self.colour)
-        for surf_rect in camera_surface_rect:  # tuple
-            self.surface.blit(surf_rect[0], surf_rect[1])
+        for rect_surf in self.draw_list:  # tuple
+            self.surface.blit(rect_surf[1], rect_surf[0])
 
     def map_capture(self):
-        # Scale map rect for camera
-        # new_size = vector_scalar_mult(self.map_rect.size, self.zoom_level)
-        # self.change_size(vector_convert_to_integer(new_size))
-        # temporarily change map_rect to new zoom size
-        # zoom in descrease rect size
+        '''Scale map_rect for zooom'''
+        center = self.map_rect.center
+        zoom_size = vector_scalar_mult(self.map_rect.size, 1.0/self.zoom_level)
+        map_rect_zoom = pygame.Rect((0,0), zoom_size)
+        map_rect_zoom.center = center
         map_ents = []
         for ent in self.state.entity_group.get_group("draw"):
-            if ent.rect.colliderect(self.map_rect):
+            if ent.rect.colliderect(map_rect_zoom):
                 map_ents.append(ent)
         return map_ents
 
     def convert_map_ents_to_camera(self, map_ents):
         '''Camera movement and zoom'''
-        camera_surface_rect = []
+        camera_rect_surface = []
         for ent in map_ents:
-            ent_colour = ent.colour
-            ent_position = ent.position
-            # ent_rect_center = ent.rect.center
-            ent_size = ent.size
-            # ent_rect = ent.rect.copy()
+            ent_position = ent.position # Cannot copy rect since it uses integers
+            ent_size = ent.rect.size
+            ent_surface = ent.surface.copy()
             
             # zoom to centre of camera
             ent_position = vector_subtract(ent_position, self.map_rect.center)
 
+            # Scale position vector and size according to zoom factor
             ent_size = vector_scalar_mult(ent_size, self.zoom_level)
             ent_rect = pygame.Rect((0,0), ent_size)
             ent_position = vector_scalar_mult(ent_position, self.zoom_level)
+            ent_surface = pygame.transform.scale(ent_surface, vector_convert_to_integer(ent_size))
 
-            ent_surface =  pygame.Surface(ent_size)
-            ent_surface.fill(ent_colour)
-
-
-            ent_position = self.translate_map_vector_to_camera_vector(ent_position)
+            # Adjust for blitting on camera screen (topleft)
+            ent_position = vector_add(self.rect.center, ent_position)
 
             ent_rect.center = ent_position
-            camera_surface_rect.append((ent_surface, ent_rect))
+            camera_rect_surface.append((ent_rect, ent_surface))
         # self.zoom_level = 1
-        return camera_surface_rect
+        return camera_rect_surface
 
     def translate_map_vector_to_camera_vector(self, map_V):
+        # CHANGE - not needed
         '''map vectors from map origin (x,y)
            camera vectors from top left corner (x,-y)'''
         return vector_subtract(map_V, self.map_rect.topleft)
 
-    def translate_camera_vector_to_map_vector(self, camera_V):
-        return vector_add(camera_V, self.map_rect.topleft)
+    def translate_camera_vector_to_map_vector(self, ctl_ze):
+        '''e - entity
+           ctl - camera top left
+           cc - camera center
+           m - map origin
+           z - scaled'''
+        cc_ze = vector_subtract(ctl_ze, self.rect.center) # camera_V is mouse_pos
+        cc_e = vector_scalar_mult(cc_ze, 1.0/self.zoom_level)
+        m_e = vector_add(self.map_rect.center, cc_e)
+        return vector_convert_to_integer(m_e)
 
     def add_selection(self, state, selection, local_mouse_pos):
         selection.position = local_mouse_pos
@@ -204,17 +218,19 @@ class Camera(graphical_surface.GraphicalSurface):
         self.map_rect.move_ip(movement)
 
     def zoom(self, factor):
-        self.zoom_level_change = factor
+        zoom_level = self.zoom_level + factor
+        if zoom_level > 0:
+            self.zoom_level = zoom_level
 
 
 
 class GUI:
-    def __init__(self, state, winsize=(700, 700)):
+    def __init__(self, display, state, camera_size=(700, 700)):
         self.state = state
         # self.camera = camera
-        self.size = winsize
-        self.display = pygame.display
         menu_height = 40
+        self.size = (camera_size[0], camera_size[1] + menu_height)
+        self.display = display
 
         # self.selected_list = []
         self.selection_store = SimpleStore()
@@ -267,7 +283,7 @@ class GUI:
                         wall = entity.Wall((0,0))
                         end_wall_V = camera.translate_camera_vector_to_map_vector(mouse_pos)
                         print(self.start_wall_V, end_wall_V)
-                        point_list = gen_coords_from_range(self.start_wall_V,end_wall_V,spacing=wall.size[0])
+                        point_list = gen_coords_from_range(self.start_wall_V,end_wall_V,spacing=wall.rect.size[0])
                         for point in point_list:
                             self.state.entity_group.add_ent([entity.Wall(point)])
                         self.selection_store.change(None)
@@ -303,5 +319,5 @@ class GUI:
         self.ui_elements["camera"].move(movement)
 
     def zoom_camera(self, factor):
-        self.ui_elements["camera"].zoom_level -= factor
+        self.ui_elements["camera"].zoom(factor)
 

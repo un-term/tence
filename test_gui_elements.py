@@ -14,42 +14,63 @@ import entity
 
 class TestGUI(unittest.TestCase):
 
-    def test_gui(self):
+    def test_1_coords_map_to_camera_topleft(self):
+        '''Based on map_camera_zoom_pan.drawio
+        scaled x10'''
         pygame.font.init()
         try: pygame.font.get_init()
         except: raise Exception("Fonts not initialising")
 
         ent_init_list = [
-            # Baddie((200,400),speed=50.0),
-            entity.Turret((250,250)),
-            entity.Turret((450,250)),
-            entity.Core((350,350)),
-            entity.Turret((250,450)),
-            entity.Turret((450,450))
+            entity.Turret((-20,30))
         ]
         entity_group_obj = entity_group.EntityGroup(ent_init_list)
         state = game.State(entity_group_obj)
 
         # entity_group.add_ent(wall_list)
-        gui = gui_elements.GUI(state)
+        display = Mock()
+        gui = gui_elements.GUI(display, state, camera_size=(120,120))
 
-        self.assertTrue(True)
+        gui.move_camera((10,20))
+        # gui.draw() # draw_list emptied at start of next draw
+        gui.zoom_camera(1)
+        gui.draw() # draw_list emptied at start of next draw
 
-    def test_camera(self):
-        parent = Mock()
-        size = (10,10)
-        ent_init_list = [ entity.Turret((5,5)) ]
-        entity_group_obj = entity_group.EntityGroup(ent_init_list)
-        state = game.State(entity_group_obj)
+        turret_rect = gui.ui_elements["camera"].draw_list[0][0]
+        # check 
+        # check camera screen position from movement, and then zoom
 
-        camera = gui_elements.Camera(parent, state, size)
+        self.assertEqual((0,80), turret_rect.center)
+
+    def test_2_click_with_zoom_pan(self):
+        '''Based on map_camera_zoom_pan.drawio
+        scaled x10'''
+
+        camera = gui_elements.Camera(None, None, (120,120))
         camera.specific_setup((0,0))
+        camera.zoom_level = 2 # 1/zoom_level
+        camera.map_rect.move_ip((10,20))
 
-        print("camera top left: ",camera.map_rect.topleft)
-        camera.capture()
-        print(camera.ui_children[0].camera_rect.center)
+        mouse_pos = (0,80)
+        result = camera.translate_camera_vector_to_map_vector(mouse_pos)
+
+        self.assertEqual((-20,30), result)
+
+    # def test_camera(self):
+    #     parent = Mock()
+    #     size = (10,10)
+    #     ent_init_list = [ entity.Turret((5,5)) ]
+    #     entity_group_obj = entity_group.EntityGroup(ent_init_list)
+    #     state = game.State(entity_group_obj)
+
+    #     camera = gui_elements.Camera(parent, state, size)
+    #     camera.specific_setup((0,0))
+    #     camera.zoom_level = 2
+    #     camera.map_rect.move_ip
+
+    #     # call gui.draw
         
-        self.assertTrue(True)
+    #     self.assertTrue(True)
 
 if __name__ == '__main__':
     unittest.main()
