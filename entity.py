@@ -41,7 +41,8 @@ def find_closest_entity(ref_entity,entity_list):
             pass
     return closest_entity
 
-def entity_factory(entity_name, *args, **kwargs):
+
+def factory(entity_name, *args, **kwargs):
     entities = {
         "turret" : Turret,
         "baddie" : Baddie,
@@ -194,7 +195,7 @@ class Baddie(Entity):
             core_position = self._find_nearest_core()
             self.velocity = self._calc_velocity_to_core(core_position)
 
-        self.position = self._new_position_from_velocity(self.entity_group.state.step_time)
+        self.position = self._new_position_from_velocity(self.entity_group.state.tick_time)
 
         self._check_dead()
 
@@ -219,8 +220,8 @@ class Baddie(Entity):
     def _calc_velocity_to_core(self,core_position):
         return calc_const_velocity(self.position, core_position, self.speed)
 
-    def _new_position_from_velocity(self,step_time):
-        return new_position(self.position,self.velocity,step_time)
+    def _new_position_from_velocity(self,tick_time):
+        return new_position(self.position,self.velocity,tick_time)
 
     def take_damage(self,damage):
         self.health -= damage
