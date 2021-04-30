@@ -19,7 +19,7 @@ class TestEntity(unittest.TestCase):
         state = game.State(entity_group_obj)
         event = game.Event(state)
         event.spawn_timestamp = 1
-        event.generate_spawn_point(5)
+        event.check_spawn_point_generation(5)
         print(state.entity_group.get_group("draw").sprites())
         
         self.assertTrue(True)

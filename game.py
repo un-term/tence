@@ -75,16 +75,23 @@ class Event:
         self.map_max_x_limit = self.state.max_map_size[0]*0.5
         self.map_max_y_limit = self.state.max_map_size[1]*0.5
         self.spawn_point_interval = 1  # s
-        
-    def generate_spawn_point(self, total_time):
+
+    def check_spawn_point_generation(self, total_time): 
         '''time in s'''
         time_diff = total_time - self.spawn_timestamp
         if time_diff > self.spawn_point_interval:
-            x_pos = random.randrange(self.map_max_x_limit*-1.0, self.map_max_x_limit, 1)
-            y_pos = random.randrange(self.map_max_y_limit*-1.0, self.map_max_y_limit, 1)
-            spawn = entity.factory("spawn",(x_pos,y_pos))
+            self.generate_spawn_point(total_time)
+
+    def generate_spawn_point(self, total_time):
+        '''time in s'''
+        x_pos = random.randrange(self.map_max_x_limit*-1.0, self.map_max_x_limit, 1)
+        y_pos = random.randrange(self.map_max_y_limit*-1.0, self.map_max_y_limit, 1)
+        spawn = entity.factory("spawn",(x_pos,y_pos))
+        if not pygame.sprite.spritecollide(spawn, self.state.entity_group.get_group("draw"), dokill = False):
             self.state.entity_group.add_ent([spawn])
             self.spawn_timestamp = total_time
+        else:
+            self.generate_spawn_point(total_time)
 
        
 class State:
@@ -131,7 +138,7 @@ class Game:
 
           # update all sprites
           #-------------------------------------------------------------
-            self.event.generate_spawn_point(self.state.total_time)
+            self.event.check_spawn_point_generation(self.state.total_time)
             self.state.entity_group.get_group("all").update()
 
             if self.gui:
