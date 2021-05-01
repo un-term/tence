@@ -248,7 +248,8 @@ class Core(Entity):
         self.position = position
 
         self.radius = 25 # shoot range - circle collision detection
-        self.health = 40.0
+        # self.health = 40.0
+        self.health = 1
 
     def update(self):
         self._check_dead()
@@ -283,18 +284,26 @@ class Wall(Entity):
         colour = YELLOW
         self.create_surface_and_rect(size, colour)
         self.position = position
+        self.health = 30
         
-
     def update(self):
-        pass
+        self._check_dead()
 
     def collision(self,ent):
         if ent.type == "baddie":
             ent.velocity = self._bounce_velocity(ent)
             ent.bounce_timestamp = self.entity_group.state.total_time
+            self.take_damage(ent.damage)
         else:
             pass
     
+    def take_damage(self, damage):
+        self.health -= damage
+
+    def _check_dead(self):
+        if self.health <= 0:
+            self.entity_group.add_ent([self],["remove"])
+
     def get_edge_midpoints(self):
         return [self.rect.midtop,self.rect.midright,self.rect.midbottom,self.rect.midleft]
 
