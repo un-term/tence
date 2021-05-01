@@ -116,7 +116,7 @@ class Turret(Entity):
                 self._shoot(hit_list[0],self.entity_group.state.total_time) # shoot first baddie in list only
                 laser = LineSprite(RED, self.position, hit_list[0].position)
                 self.entity_group.add_ent([laser],["draw","remove"])
-            self._check_dead()
+        self._check_dead()
 
     def collision(self,ent):
         if ent.type == "baddie":
