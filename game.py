@@ -149,7 +149,7 @@ class Game:
                 if self.user_input:
                     self.user_input.check()
                 if self.sound:
-                    self.sound
+                    pass
 
             # Limit map fps and get times
             self.state.set_and_get_tick()
