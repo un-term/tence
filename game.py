@@ -74,7 +74,7 @@ class Event:
         # Limits for random spawn location
         self.map_max_x_limit = self.state.max_map_size[0]*0.5
         self.map_max_y_limit = self.state.max_map_size[1]*0.5
-        self.spawn_point_interval = 1  # s
+        self.spawn_point_interval = 2  # s
 
     def check_spawn_point_generation(self, total_time): 
         '''time in s'''
