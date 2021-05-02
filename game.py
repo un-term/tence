@@ -3,6 +3,7 @@
 import pygame
 import math
 import random
+import time
 # from multipledispatch import dispatch
 
 # user modules
@@ -156,7 +157,10 @@ class Game:
             # remove dead & other ephemeral entities 
             self.state.entity_group.rm_ent_from_all_groups(["remove"])
 
-    pygame.quit()
+        if self.gui:
+            self.gui.display_game_over()
+            time.sleep(5)
+        pygame.quit()
 
 
 def main():

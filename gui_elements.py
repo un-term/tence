@@ -1,5 +1,5 @@
 import pygame
-
+import pygame.freetype
 from constants import *
 from general_functions import *
 import entity
@@ -95,6 +95,23 @@ class Screen(graphical_surface.GraphicalSurface):
         self.colour = BLACK
         self.create_surface_and_rect(size, self.colour)
         self.surface = display.set_mode(size)
+
+
+class EndGame(graphical_surface.GraphicalSurface):
+    def __init__(self ,parent, parent_rect):
+        graphical_surface.GraphicalSurface.__init__(self, parent)
+        self.bg_colour = BLACK
+        self.text_colour= BLUE
+        # self.create_surface_and_rect(size, self.bg_colour)
+
+        # https://nerdparadise.com/programming/pygame/part5
+        font = pygame.freetype.Font(None ,60)  # None - default system font
+        # self.rect = font.get_rect()
+        self.surface, self.rect  = font.render("GAME OVER", self.text_colour, self.bg_colour) # text 
+        # self.rect = pygame.freetype.Font.get_rect(self.surface)
+        self.rect.center = parent_rect.center
+        # pos = (self.rect.center[0] - 150, self.rect.center[1])
+        # font.render_to(self.surface, pos, "GAME OVER", self.text_colour, self.bg_colour)
 
 
 # CHANGE - not updated and won't work
@@ -223,7 +240,6 @@ class Camera(graphical_surface.GraphicalSurface):
             self.zoom_level = zoom_level
 
 
-
 class GUI:
     def __init__(self, display, state, camera_size=(700, 700)):
         self.state = state
@@ -321,3 +337,10 @@ class GUI:
     def zoom_camera(self, factor):
         self.ui_elements["camera"].zoom(factor)
 
+    def display_game_over(self):
+        screen = self.ui_elements["screen"]
+        end_game = EndGame(screen, screen.rect)
+        screen.ui_children.clear()
+        screen.ui_children.append(end_game)
+        screen.draw()
+        self.display.update()
