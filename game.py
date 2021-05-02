@@ -165,9 +165,7 @@ class Game:
 
 def main():
 
-    pygame.font.init()
-    try: pygame.font.get_init()
-    except: raise Exception("Fonts not initialising")
+    pygame.freetype.init()
 
     # coordinate system - right +x, down +y
     ent_init_list = [
