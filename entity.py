@@ -266,7 +266,7 @@ class Core(Entity):
 
     def _check_dead(self):
         """CHANGE - adding entities to game_over group to avoid having to know game object"""
-        if self.health < 0:
+        if self.health <= 0:
             self.entity_group.state.end_game()
             print("game over")
 
