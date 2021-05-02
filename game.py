@@ -93,8 +93,8 @@ class Event:
             self.spawn_timestamp = total_time
         else:
             self.generate_spawn_point(total_time)
-
        
+
 class State:
     def __init__(self, entity_group):
         self.game_over = 0

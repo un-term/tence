@@ -248,8 +248,7 @@ class Core(Entity):
         self.position = position
 
         self.radius = 25 # shoot range - circle collision detection
-        # self.health = 40.0
-        self.health = 1
+        self.health = 40.0
 
     def update(self):
         self._check_dead()
