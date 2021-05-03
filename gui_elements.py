@@ -263,7 +263,7 @@ class GUI:
         self.ui_elements["menu"] = Menu(self.ui_elements["screen"],menu_height)
         self.ui_elements["menu_box"] = MenuBox(self.ui_elements["menu"],menu_height)
         self.ui_elements["selection_box"] = SelectionBox(self.ui_elements["menu"],menu_height,self.selection_store)
-        entity_menu_items = [entity.Core((0,0)),entity.Turret((0,0)),entity.Wall((0,0)),entity.Spawn((0,0))]
+        entity_menu_items = [entity.Turret((0,0)),entity.Wall((0,0))]
         self.ui_elements["menu_box"].add_menu_entity(entity_menu_items)
 
         # populate ui_children
