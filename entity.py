@@ -6,7 +6,8 @@ from general_functions import *
 from constants import *
 import graphical_surface
 
-def get_rect_edge_axis(rect,midpoint):
+
+def get_rect_edge_axis(rect, midpoint):
     """CHANGE: brittle if rect is rotated"""
     if rect.midtop == midpoint:
         return "x"
@@ -18,8 +19,9 @@ def get_rect_edge_axis(rect,midpoint):
         return "y"
     else:
         raise Exception("Point not found on rect")
-    
-def find_closest_entity(ref_entity,entity_list):
+
+
+def find_closest_entity(ref_entity, entity_list):
     closest_entity = entity_list[0]
     for entity in entity_list[1:]:
         if magnitude(vector_subtract(ref_entity.position,entity.position)) < magnitude(vector_subtract(ref_entity.position,closest_entity.position)):
@@ -56,7 +58,6 @@ class Entity(graphical_surface.GraphicalSurface):
 
 class LineSprite(Entity):
     def __init__(self,colour, start, end):
-        # def __init__(self):
         Entity.__init__(self)
         size = vector_abs(vector_subtract(start,end))
         colour = BLACK
@@ -66,11 +67,10 @@ class LineSprite(Entity):
         center = vector_vector_midpoint(end,start)
         # self.rect.center = center
         self.position = center
-        # pygame.draw.aaline(self.surface,self.colour,start,end)
         local_start = coord_sys_map_translation(self.rect.topleft, start)
         local_end = coord_sys_map_translation(self.rect.topleft, end)
         pygame.draw.line(self.surface,RED,local_start,local_end,3)
-        # line drawn on surface local coordinate system
+        # pygame.draw.aaline(self.surface,self.colour,start,end) - anti-aliasing
 
     def update(self):
         pass
@@ -164,11 +164,11 @@ class Baddie(Entity):
         """calls internal methods"""
 
         self.entity_group.get_group("collision").empty()
-        self.entity_group.add_ent(self._check_for_collision(["all"]),["collision"])
+        self.entity_group.add_ent(self._check_for_collision(["all"]), ["collision"])
 
-        core_list = self.entity_group.find_overlap("core","collision")
-        turret_list = self.entity_group.find_overlap("turret","collision")
-        wall_list = self.entity_group.find_overlap("wall","collision")
+        core_list = self.entity_group.find_overlap("core", "collision")
+        turret_list = self.entity_group.find_overlap("turret", "collision")
+        wall_list = self.entity_group.find_overlap("wall", "collision")
         if core_list:
             core_list[0].collision(self)
         elif turret_list:
@@ -226,7 +226,6 @@ class Baddie(Entity):
   
 
 class Core(Entity):
-    # Constructor
     def __init__(self,position):
         Entity.__init__(self)
         size = (50,50)
@@ -244,17 +243,15 @@ class Core(Entity):
     def collision(self, ent):
         if ent.type == "baddie":
             self.take_damage(ent.damage)
-           # ent.health(self,ent.damage)
             ent.health = 0
 
     def take_damage(self, damage):
         self.health -= damage
 
     def _check_dead(self):
-        """CHANGE - adding entities to game_over group to avoid having to know game object"""
         if self.health <= 0:
+            # Game over
             self.entity_group.state.end_game()
-            print("game over")
 
     def _check_health(self):
         if self.health < 10:

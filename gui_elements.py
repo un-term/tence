@@ -47,7 +47,6 @@ class SelectionBox(graphical_surface.GraphicalSurface):
 class MenuBox(graphical_surface.GraphicalSurface):
     def __init__(self,parent,menu_height):
         graphical_surface.GraphicalSurface.__init__(self,parent)
-
         self.colour = GREY
         size = (self.ui_parent.rect.size[0]-menu_height,self.ui_parent.rect.size[1])
         self.create_surface_and_rect(size, self.colour)
@@ -80,7 +79,6 @@ class MenuBox(graphical_surface.GraphicalSurface):
 class Menu(graphical_surface.GraphicalSurface):
     def __init__(self,parent,menu_height):
         graphical_surface.GraphicalSurface.__init__(self,parent)
-
         self.menu_height = menu_height
         self.colour = BLACK
         size = (self.ui_parent.rect.size[0],self.menu_height)
@@ -103,15 +101,10 @@ class EndGame(graphical_surface.GraphicalSurface):
         self.bg_colour = BLACK
         self.text_colour= GREEN
 
-        # https://nerdparadise.com/programming/pygame/part5
+        # Font https://nerdparadise.com/programming/pygame/part5
         font = pygame.freetype.Font(None ,60)  # None - default system font
-        # self.rect = font.get_rect()
         self.surface, self.rect  = font.render("GAME OVER", self.text_colour, self.bg_colour) # text 
-        # self.rect = pygame.freetype.Font.get_rect(self.surface)
         self.rect.center = parent_rect.center
-        # pos = (self.rect.center[0] - 150, self.rect.center[1])
-        # font.render_to(self.surface, pos, "GAME OVER", self.text_colour, self.bg_colour)
-
 
 # CHANGE - not updated and won't work
 # class KillCount(pygame.sprite.Sprite):
@@ -185,7 +178,8 @@ class Camera(graphical_surface.GraphicalSurface):
         return map_ents
 
     def convert_map_ents_to_camera(self, map_ents):
-        '''Camera movement and zoom'''
+        '''Camera movement and zoom
+           See notes for explanation'''
         camera_rect_surface = []
         for ent in map_ents:
             ent_position = ent.position # Cannot copy rect since it uses integers
@@ -209,11 +203,10 @@ class Camera(graphical_surface.GraphicalSurface):
         # self.zoom_level = 1
         return camera_rect_surface
 
-    def translate_map_vector_to_camera_vector(self, map_V):
-        # CHANGE - not needed
-        '''map vectors from map origin (x,y)
-           camera vectors from top left corner (x,-y)'''
-        return vector_subtract(map_V, self.map_rect.topleft)
+    # def translate_map_vector_to_camera_vector(self, map_V):
+    #     '''map vectors from map origin (x,y)
+    #        camera vectors from top left corner (x,-y)'''
+    #     return vector_subtract(map_V, self.map_rect.topleft)
 
     def translate_camera_vector_to_map_vector(self, ctl_ze):
         '''e - entity

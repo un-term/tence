@@ -1,7 +1,7 @@
 import pygame
 
 class EntityGroup:
-    """all imported entities are being drawn"""
+    """All imported entities are being drawn"""
     def __init__(self, entity_list):
         self.state = None
 
@@ -82,31 +82,3 @@ class EntityGroup:
             return overlap
         else:
             return overlap
-                    
-    # try: 
-    #   group_name in self.dict
-    # except: 
-    # if group_name in self.dict:
-    #   return self.dict[group_name]
-    # else:
-    #   print("Cannot get", group_name, " does not exist")
-
-  # def __len__(self):
-  #   return len(self.dict)
-
-  # def __getitem__(self, key): # x[key]
-  #   """change - introduce more checks"""
-  #   found = self.dict[key]
-  #   if found is None:
-  #       raise TypeError('not indexable')
-  #   elif not found:
-  #     raise KeyError(key)
-  #   else:
-  #     return self.dict[key]
-    # found = dict[key]
-  
-  # def __setitem__(self, key, value): # x[key] = value
-  #   if self.dict is None:
-  #     raise TypeError('not indexable')
-    
-  #   self.dict[key] = value

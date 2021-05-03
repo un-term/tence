@@ -4,7 +4,6 @@ import pygame
 import math
 import random
 import time
-# from multipledispatch import dispatch
 
 # user modules
 import entity
@@ -59,6 +58,7 @@ class UserInput:
             elif event.key == pygame.K_LEFT:
                 self.gui.move_camera((-1.0*jump,0))
 
+    # Zoom
     def _check_plus_minus(self, event):
         factor = 0.1
         if event.type == pygame.KEYDOWN:
@@ -75,7 +75,7 @@ class Event:
         # Limits for random spawn location
         self.map_max_x_limit = self.state.max_map_size[0]*0.5
         self.map_max_y_limit = self.state.max_map_size[1]*0.5
-        self.spawn_point_interval = 2  # s
+        self.spawn_point_interval = 2  # seconds
 
     def check_spawn_point_generation(self, total_time): 
         '''time in s'''
@@ -124,22 +124,20 @@ class State:
 
 class Game:
     def __init__(self, state, event, gui=None, user_input=None, sound=None):
-        try: self.state = state
-        except: raise Exception("state not defined")
+        self.state = state
         self.gui = gui # screen
         self.user_input = user_input
         self.sound = sound
         self.event = event
 
-    #===================================================================
+    # Main game loop
     def loop(self):
         """main game loop"""
     
         while not self.state.game_over:
 
-          # update all sprites
-          #-------------------------------------------------------------
             self.event.check_spawn_point_generation(self.state.total_time)
+            # update all sprites
             self.state.entity_group.get_group("all").update()
 
             if self.gui:
@@ -157,6 +155,7 @@ class Game:
             # remove dead & other ephemeral entities 
             self.state.entity_group.rm_ent_from_all_groups(["remove"])
 
+        # Game Over screen
         if self.gui:
             self.gui.display_game_over()
             time.sleep(5)
@@ -185,7 +184,6 @@ def main():
     facdustry = Game(state, event, gui, user_input, sound=None)
     facdustry.loop()
 
-# if python says run, then we should run
+# run
 if __name__ == "__main__":
     main()
-#     

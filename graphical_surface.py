@@ -4,6 +4,7 @@ from general_functions import *
 class GraphicalSurface(pygame.sprite.Sprite):
     def __init__(self,parent):
         pygame.sprite.Sprite.__init__(self)
+        # Takes class name 
         self.type = self.__class__.__name__.lower()
         self.ui_parent = parent
         self.ui_children = []
