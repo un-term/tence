@@ -101,8 +101,7 @@ class EndGame(graphical_surface.GraphicalSurface):
     def __init__(self ,parent, parent_rect):
         graphical_surface.GraphicalSurface.__init__(self, parent)
         self.bg_colour = BLACK
-        self.text_colour= BLUE
-        # self.create_surface_and_rect(size, self.bg_colour)
+        self.text_colour= GREEN
 
         # https://nerdparadise.com/programming/pygame/part5
         font = pygame.freetype.Font(None ,60)  # None - default system font
