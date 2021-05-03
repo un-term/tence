@@ -6,19 +6,6 @@ from general_functions import *
 from constants import *
 import graphical_surface
 
-def check_for_type(ent_list, ent_type):
-    exists = False
-    for ent in ent_list:
-        if ent.type == ent_type:
-            exists = True
-    return exists
-
-def remove_type_from_list(ent_list, ent_type):
-    for ent in ent_list:
-        if ent.type == ent_type:
-            ent_list.remove(ent)
-    return ent_list
-
 def get_rect_edge_axis(rect,midpoint):
     """CHANGE: brittle if rect is rotated"""
     if rect.midtop == midpoint:

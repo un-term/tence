@@ -11,27 +11,6 @@ from general_functions import *
 
 class TestEntity(unittest.TestCase):
 
-    def test_check_for_type(self):
-
-        ent_init_list = [
-            Baddie((150,150)),
-            Turret((100,100)),
-            Core((50,50))
-        ]
-        result = check_for_type(ent_init_list,"baddie")
-        self.assertTrue(result) 
-
-    def test_remove_type_from_list(self):
-
-        ent_init_list = [
-            Baddie((150,150)),
-            Turret((100,100)),
-            Core((50,50))
-        ]
-        ent_init_list = remove_type_from_list(ent_init_list,"baddie")
-        result = check_for_type(ent_init_list,"baddie")
-        self.assertFalse(result) 
-
     def test_line_sprite(self):
 
         entity_group = EntityGroup([LineSprite(RED,(0,0),(100,100))])
