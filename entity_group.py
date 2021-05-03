@@ -23,7 +23,7 @@ class EntityGroup:
         self._add_ent_to_own_group(entity_list)
         self._add_ent_from_list(entity_list,group_list)
         #ref
-        self.link_ent_to_entity_group(self.dict["all"])
+        self.link_ent_to_entity_group(entity_list)
 
     def _create_groups_from_ent(self, entity_list):
         for entity in entity_list:
