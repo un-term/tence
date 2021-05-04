@@ -20,9 +20,10 @@ class TestEntity(unittest.TestCase):
         event = game.Event(state)
         event.spawn_timestamp = 1
         event.check_spawn_point_generation(5)
-        print(state.entity_group.get_group("draw").sprites())
+        # print(state.entity_group.get_group("draw").sprites())
+        nb_spawns = len(state.entity_group.get_group("draw").sprites())
         
-        self.assertTrue(True)
+        self.assertEqual(1, nb_spawns)
 
 if __name__ == '__main__':
       unittest.main()

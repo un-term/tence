@@ -27,18 +27,14 @@ class TestGUI(unittest.TestCase):
         entity_group_obj = entity_group.EntityGroup(ent_init_list)
         state = game.State(entity_group_obj)
 
-        # entity_group.add_ent(wall_list)
         display = Mock()
         gui = gui_elements.GUI(display, state, camera_size=(120,120))
 
         gui.move_camera((10,20))
-        # gui.draw() # draw_list emptied at start of next draw
         gui.zoom_camera(1)
         gui.draw() # draw_list emptied at start of next draw
 
         turret_rect = gui.ui_elements["camera"].draw_list[0][0]
-        # check 
-        # check camera screen position from movement, and then zoom
 
         self.assertEqual((0,80), turret_rect.center)
 
