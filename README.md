@@ -15,6 +15,10 @@ Clone repository:
 
 ```git clone ....```
 
+Change into source directory:
+
+```cd tence/```
+
 Setup [Python virtual env](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) (Linux/macOS):
 
 ``` source env/bin/activate ``` 
@@ -40,5 +44,5 @@ Install Python requirements in virtual environment:
 * BLUE - turret: click to place
 * YELLOW - wall: click start position and end
 
-Selection shows buttom right
+Build menu selection shows buttom right
 
