@@ -8,6 +8,7 @@ Defend your core against incoming enemy units in a 2D real-time tower defence ga
 
 * git
 * minimum Python 3.9
+* [Python virtual env](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#installing-virtualenv)
 
 ## Installation
 
@@ -19,13 +20,21 @@ Change into source directory:
 
 ```cd tence/```
 
-Setup [Python virtual env](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) (Linux/macOS):
+Create a virtual env:
+
+``` python3 -m venv env ```
+
+Activate the new virtual environment:
 
 ``` source env/bin/activate ``` 
 
 Install Python requirements in virtual environment: 
 
 ``` python3 -m pip install -r requirements.txt ```
+
+To leave the Python virtual environment, after playing:
+
+``` deactivate ```
 
 ## Play
 
