@@ -173,7 +173,7 @@ class Baddie(Entity):
             core_list[0].collision(self)
         elif turret_list:
             turret_list[0].collision(self)
-        elif self.check_bounce(self.entity_group.state.total_time, bounce_limit=0.15):
+        # elif self.check_bounce(self.entity_group.state.total_time, bounce_limit=0.15):
             pass # keep bounce velocity
         elif wall_list:
             wall = find_closest_entity(self,wall_list) # bounce off closest
