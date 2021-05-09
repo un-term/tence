@@ -14,7 +14,7 @@ Defend your core against incoming enemy units in a 2D real-time tower defence ga
 
 Clone repository: 
 
-```git clone ....```
+```git clone https://github.com/un-term/tence```
 
 Change into source directory:
 
