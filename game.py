@@ -103,7 +103,7 @@ class State:
         self.entity_group.state = self
 
         self.grid = (20,20)
-        self.max_map_size = (1000,1000)
+        self.max_map_size = (3000,3000)
 
         self.clock = pygame.time.Clock()
 
