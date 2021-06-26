@@ -93,7 +93,7 @@ class Event:
             self.spawn_timestamp = total_time
         else:
             self.generate_spawn_point(total_time)
-       
+
 
 class State:
     def __init__(self, entity_group):
@@ -103,7 +103,7 @@ class State:
         self.entity_group.state = self
 
         self.grid = (20,20)
-        self.max_map_size = (3000,3000)
+        self.max_map_size = (2000,2000)
 
         self.clock = pygame.time.Clock()
 
@@ -123,9 +123,10 @@ class State:
 
 
 class Game:
-    def __init__(self, state, event, gui=None, user_input=None, sound=None):
+    def __init__(self, state, event, gcd,  gui=None, user_input=None, sound=None):
         self.state = state
         self.gui = gui # screen
+        self.gcd = gcd
         self.user_input = user_input
         self.sound = sound
         self.event = event
@@ -137,6 +138,8 @@ class Game:
         while not self.state.game_over:
 
             self.event.check_spawn_point_generation(self.state.total_time)
+            # Collision detection
+            self.gcd.collision_detection()
             # update all sprites
             self.state.entity_group.get_group("all").update()
 
@@ -176,12 +179,13 @@ def main():
     ]
     entity_group = EntityGroup(ent_init_list)
     state = State(entity_group)
+    gcd = entity.GroupCollisionDetection(state)
 
     gui = gui_elements.GUI(pygame.display, state, camera_size=(700,700))
     # sound = Sound()
     user_input = UserInput(state, gui)
     event = Event(state)
-    facdustry = Game(state, event, gui, user_input, sound=None)
+    facdustry = Game(state, event, gcd, gui, user_input, sound=None)
     facdustry.loop()
 
 # run

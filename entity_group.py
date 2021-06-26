@@ -82,3 +82,6 @@ class EntityGroup:
             return overlap
         else:
             return overlap
+
+    def group_collision_detection(self, entity_group, target_group, collision_function):
+        return pygame.sprite.groupcollide(entity_group, target_group, False, False, collided=collision_function)

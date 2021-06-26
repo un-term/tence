@@ -11,7 +11,8 @@ class GraphicalSurface(pygame.sprite.Sprite):
         self.colour = None
         self.rect = None
         self.camera_rect = None
-        self.surface = None
+        # Surface should be specified in the class that inherits from this one 
+        # self.surface = None
         self.selectable = False
 
     def create_surface_and_rect(self, size, colour):

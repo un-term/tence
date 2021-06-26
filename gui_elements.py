@@ -20,11 +20,15 @@ class SimpleStore:
     def change(self,value):
         self.shelf = value
 
-
-class SelectionBox(graphical_surface.GraphicalSurface):
-    def __init__(self,parent,menu_height,selection_store):
+class InterfaceSurface(graphical_surface.GraphicalSurface):
+    def __init__(self,parent):
         graphical_surface.GraphicalSurface.__init__(self,parent)
-        
+        self.surface = None
+
+
+class SelectionBox(InterfaceSurface):
+    def __init__(self,parent,menu_height,selection_store):
+        InterfaceSurface.__init__(self,parent)
         self.colour = BLACK
         size = (menu_height, menu_height)
         self.create_surface_and_rect(size, self.colour)
@@ -44,9 +48,18 @@ class SelectionBox(graphical_surface.GraphicalSurface):
             item.update_gui()
 
 
-class MenuBox(graphical_surface.GraphicalSurface):
+class MenuItem(InterfaceSurface):
+    def __init__(self, parent, type, rect, surface):
+        InterfaceSurface.__init__(self, parent)
+        self.type = type
+        self.rect = rect
+        self.surface = surface
+        self.selectable = True
+
+
+class MenuBox(InterfaceSurface):
     def __init__(self,parent,menu_height):
-        graphical_surface.GraphicalSurface.__init__(self,parent)
+        InterfaceSurface.__init__(self,parent)
         self.colour = GREY
         size = (self.ui_parent.rect.size[0]-menu_height,self.ui_parent.rect.size[1])
         self.create_surface_and_rect(size, self.colour)
@@ -59,11 +72,10 @@ class MenuBox(graphical_surface.GraphicalSurface):
         for count, item in enumerate(entity_menu_items):
             dist = self.menu_item_size[0] + self.menu_entity_offset
             coord_x = dist * (count+1) - 0.5*self.menu_item_size[0]
-            item.rect, item.surface = resize_rect_and_surface(item.rect, item.surface, self.menu_item_size)
-            item.position = (coord_x, self.rect.center[1])
-            item.selectable = True
-
-            self.ui_children.append(item)
+            rect, surface = resize_rect_and_surface(item.rect, item.surface, self.menu_item_size)
+            menu_item = MenuItem(self, item.type, rect, surface)
+            menu_item.rect.center = (coord_x, self.rect.center[1])
+            self.ui_children.append(menu_item)
 
     def click(self,local_coord):
         found = None
@@ -71,14 +83,14 @@ class MenuBox(graphical_surface.GraphicalSurface):
             if item.rect.collidepoint(local_coord):
                 found = item
         if found:
-            return found.__class__((0,0))
+            return entity.factory(found.type, (0,0))
         else:
             return None
 
 
-class Menu(graphical_surface.GraphicalSurface):
+class Menu(InterfaceSurface):
     def __init__(self,parent,menu_height):
-        graphical_surface.GraphicalSurface.__init__(self,parent)
+        InterfaceSurface.__init__(self,parent)
         self.menu_height = menu_height
         self.colour = BLACK
         size = (self.ui_parent.rect.size[0],self.menu_height)
@@ -86,18 +98,18 @@ class Menu(graphical_surface.GraphicalSurface):
         self.rect.topleft = (0,self.ui_parent.rect.size[1] - self.menu_height) # relative to parent
 
 
-class Screen(graphical_surface.GraphicalSurface):
+class Screen(InterfaceSurface):
     def __init__(self,parent,display,size):
-        graphical_surface.GraphicalSurface.__init__(self,parent)
+        InterfaceSurface.__init__(self,parent)
 
         self.colour = BLACK
         self.create_surface_and_rect(size, self.colour)
         self.surface = display.set_mode(size)
 
 
-class EndGame(graphical_surface.GraphicalSurface):
+class EndGame(InterfaceSurface):
     def __init__(self ,parent, parent_rect):
-        graphical_surface.GraphicalSurface.__init__(self, parent)
+        InterfaceSurface.__init__(self, parent)
         self.bg_colour = BLACK
         self.text_colour= GREEN
 
@@ -121,10 +133,10 @@ class EndGame(graphical_surface.GraphicalSurface):
 #         self.rect = self.image.get_rect()
 #         self.rect.bottomright = self.gui.menu_rect.bottomright
 
-class Camera(graphical_surface.GraphicalSurface):
+class Camera(InterfaceSurface):
     '''Straddling both coordinate systems'''
     def __init__(self, parent, state, size):
-        graphical_surface.GraphicalSurface.__init__(self, parent)
+        InterfaceSurface.__init__(self, parent)
         self.state = state
         self.colour = BLACK
         self.size = size
@@ -157,25 +169,31 @@ class Camera(graphical_surface.GraphicalSurface):
         
     def draw(self):
         '''Overloading base class draw method
-        Copies entity surface and rects for drawing'''
+        Copies surface and rects for drawing'''
+        # Draw entities
         self.draw_list.clear()
-        map_ents = self.map_capture()
+        map_ents = self.map_capture("draw")
         self.draw_list.extend(self.convert_map_ents_to_camera(map_ents))
         self.surface.fill(self.colour)
         for rect_surf in self.draw_list:  # tuple
             self.surface.blit(rect_surf[1], rect_surf[0])
-
-    def map_capture(self):
+        # Draw special effects
+        if self.state.entity_group.get_group("special_effects"):
+            self.draw_list.clear()
+            map_effects = self.map_capture("special_effects")
+            self.draw_list.extend(self.convert_map_ents_to_camera(map_effects))
+            for rect_surf in self.draw_list:  # tuple
+                self.surface.blit(rect_surf[1], rect_surf[0])
+        
+    def map_capture(self, group_name):
         '''Scale map_rect for zooom'''
         center = self.map_rect.center
         zoom_size = vector_scalar_mult(self.map_rect.size, 1.0/self.zoom_level)
-        map_rect_zoom = pygame.Rect((0,0), zoom_size)
-        map_rect_zoom.center = center
-        map_ents = []
-        for ent in self.state.entity_group.get_group("draw"):
-            if ent.rect.colliderect(map_rect_zoom):
-                map_ents.append(ent)
-        return map_ents
+        map_sprite = pygame.sprite.Sprite()
+        map_sprite.rect = pygame.Rect((0,0), zoom_size)
+        map_sprite.image = None
+        map_sprite.rect.center = center
+        return pygame.sprite.spritecollide(map_sprite, self.state.entity_group.get_group(group_name), False, pygame.sprite.collide_rect)
 
     def convert_map_ents_to_camera(self, map_ents):
         '''Camera movement and zoom
@@ -265,6 +283,7 @@ class GUI:
 
     def update(self):
         self.ui_elements["screen"].update_gui()  # Recursion
+        self.special_effects_update()
         pass
 
     def draw(self):
@@ -274,7 +293,6 @@ class GUI:
 
     def click(self,mouse_pos):
         coord_store = SimpleStore()
-        print(mouse_pos)
 
         screen = self.ui_elements["screen"]
         camera = self.ui_elements["camera"]
@@ -290,7 +308,6 @@ class GUI:
                     else:
                         wall = entity.Wall((0,0))
                         end_wall_V = camera.translate_camera_vector_to_map_vector(mouse_pos)
-                        print(self.start_wall_V, end_wall_V)
                         point_list = gen_coords_from_range(self.start_wall_V,end_wall_V,spacing=wall.rect.size[0])
                         for point in point_list:
                             self.state.entity_group.add_ent([entity.Wall(point)])
@@ -336,3 +353,11 @@ class GUI:
         screen.ui_children.append(end_game)
         screen.draw()
         self.display.update()
+
+    def special_effects_update(self):
+        se_group = self.state.entity_group.get_group("special_effects")
+        if se_group:
+            for effect in se_group:
+                time_elapsed = self.state.total_time - effect.created_timestamp
+                if time_elapsed > effect.alive_duration:
+                    effect.kill()
